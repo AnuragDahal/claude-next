@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from "react";
 import { type Message } from "@/lib/types";
+import { useChatContext } from "@/context/chat-context";
 
 export function useChat() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { messages, setMessages } = useChatContext();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 

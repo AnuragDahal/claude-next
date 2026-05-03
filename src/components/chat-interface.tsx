@@ -15,36 +15,17 @@ import {
   Sparkles,
   User,
 } from "lucide-react";
-import React from "react";
 
 import { getGreeting } from "@/lib/utils/greeting";
 
 import { useChat } from "@/hooks/use-chat";
+import { useScroll } from "@/hooks/use-scroll";
 
 export function ChatInterface() {
-  const {
-    messages,
-    setMessages,
-    input,
-    setInput,
-    isLoading,
-    handleInput,
-    handleSend,
-  } = useChat();
+  const { messages, input, isLoading, handleInput, handleSend } = useChat();
+  const messagesEndRef = useScroll(messages);
 
   const greeting = getGreeting();
-
-  React.useEffect(() => {
-    const handleReset = () => {
-      setMessages([]);
-      setInput("");
-      const textareas = document.querySelectorAll("textarea");
-      textareas.forEach((t) => (t.style.height = ""));
-    };
-    window.addEventListener("reset-chat", handleReset);
-    return () => window.removeEventListener("reset-chat", handleReset);
-  }, [setMessages, setInput]);
-
   const isHome = messages.length === 0;
 
   return (
@@ -205,6 +186,7 @@ export function ChatInterface() {
                   </div>
                 </div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
         )}

@@ -1,11 +1,22 @@
 "use client";
 
-import * as React from "react";
-import { Send, User, Sparkles, Paperclip, MoreHorizontal } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import {
+  ArrowUp,
+  AudioLines,
+  ChevronDown,
+  MoreHorizontal,
+  Paperclip,
+  Plus,
+  Send,
+  Sparkles,
+  User,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -14,30 +25,13 @@ interface Message {
   content: string;
 }
 
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import {
-  Plus,
-  ChevronDown,
-  AudioLines,
-  GraduationCap,
-  Pencil,
-  Code2,
-  Coffee,
-  Lightbulb,
-} from "lucide-react";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
-
 export function ChatInterface() {
-  const [messages, setMessages] = React.useState<Message[]>([]);
-  const [input, setInput] = React.useState("");
-  const [greeting, setGreeting] = React.useState("Good evening");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [greeting, setGreeting] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
       setGreeting("Good morning");
@@ -50,8 +44,8 @@ export function ChatInterface() {
     }
   }, []);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -61,17 +55,39 @@ export function ChatInterface() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setIsLoading(true);
 
-    // Simulate assistant response
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content:
-          "I'm a Claude clone UI built with shadcn and Next.js. I look pretty good, don't I?",
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-    }, 1000);
+    // Simulate thinking delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const assistantId = (Date.now() + 1).toString();
+    const assistantMessage: Message = {
+      id: assistantId,
+      role: "assistant",
+      content: "",
+    };
+
+    setMessages((prev) => [...prev, assistantMessage]);
+
+    const fullResponse =
+      "I'm a Claude clone UI built with shadcn and Next.js. I've been updated to support simulated streaming and a more dynamic interface! How can I help you further today?";
+
+    let currentText = "";
+    const words = fullResponse.split(" ");
+
+    for (let i = 0; i < words.length; i++) {
+      currentText += (i === 0 ? "" : " ") + words[i];
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantId ? { ...msg, content: currentText } : msg,
+        ),
+      );
+      await new Promise((resolve) =>
+        setTimeout(resolve, 50 + Math.random() * 50),
+      );
+    }
+
+    setIsLoading(false);
   };
 
   const isHome = messages.length === 0;
@@ -83,16 +99,6 @@ export function ChatInterface() {
         <div className="flex items-center gap-3">
           <SidebarTrigger />
         </div>
-        {!isHome && (
-          <div className="flex items-center gap-2">
-            <div className="size-6 bg-primary rounded-md flex items-center justify-center">
-              <Sparkles className="size-4 text-primary-foreground" />
-            </div>
-            <h2 className="text-lg font-semibold tracking-tight">
-              Claude Clone
-            </h2>
-          </div>
-        )}
         <div className="flex items-center gap-2">
           {isHome && (
             <Button
@@ -124,25 +130,26 @@ export function ChatInterface() {
             </div>
 
             <div className="w-full max-w-2xl animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
-              <div className="relative group bg-card border border-border shadow-2xl rounded-[32px] p-2 transition-all hover:border-border/80 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
+              <div className="relative group bg-card border border-border rounded-[28px] p-1.5 transition-all hover:border-border/80 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
                 <Textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="How can I help you today?"
-                  className="w-full min-h-[120px] bg-transparent border-none focus-visible:ring-0 resize-none py-6 px-6 text-xl placeholder:text-muted-foreground/60 leading-relaxed shadow-none"
+                  className="w-full min-h-[100px] bg-transparent border-none focus-visible:ring-0 resize-none py-5 px-6 text-2xl placeholder:text-muted-foreground/60 leading-tight shadow-none"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       handleSend();
                     }
                   }}
+                  disabled={isLoading}
                 />
-                <div className="flex items-center justify-between px-4 py-2 border-t border-border/10">
+                <div className="flex items-center justify-between px-4 py-2 border-t border-border/5">
                   <div className="flex items-center gap-1">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-10 rounded-full hover:bg-muted text-muted-foreground"
+                      className="size-9 rounded-full hover:bg-muted text-muted-foreground"
                     >
                       <Plus className="size-5" />
                     </Button>
@@ -151,45 +158,31 @@ export function ChatInterface() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-9 gap-1.5 rounded-xl px-3 text-muted-foreground hover:text-foreground hover:bg-muted"
+                      className="h-8 gap-1.5 rounded-xl px-3 text-muted-foreground hover:text-foreground hover:bg-muted"
                     >
-                      <span className="text-sm font-medium">Sonnet 3.5</span>
-                      <ChevronDown className="size-4" />
+                      <span className="text-xs font-medium">Sonnet 3.5</span>
+                      <ChevronDown className="size-3.5" />
                     </Button>
-                    <div className="h-4 w-px bg-border/20 mx-1" />
+                    <div className="h-4 w-px bg-border/10 mx-1" />
                     <Button
-                      variant="ghost"
+                      onClick={handleSend}
+                      variant={input.trim() ? "default" : "ghost"}
                       size="icon"
-                      className="size-10 rounded-full hover:bg-muted text-muted-foreground"
+                      className={cn(
+                        "size-9 rounded-full transition-all duration-200",
+                        input.trim()
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                          : "hover:bg-muted text-muted-foreground",
+                      )}
                     >
-                      <AudioLines className="size-5" />
+                      {input.trim() ? (
+                        <ArrowUp className="size-5" />
+                      ) : (
+                        <AudioLines className="size-5" />
+                      )}
                     </Button>
                   </div>
                 </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="flex flex-wrap items-center justify-center gap-2 mt-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
-                <QuickActionButton
-                  icon={<GraduationCap className="size-4" />}
-                  label="Learn"
-                />
-                <QuickActionButton
-                  icon={<Pencil className="size-4" />}
-                  label="Write"
-                />
-                <QuickActionButton
-                  icon={<Code2 className="size-4" />}
-                  label="Code"
-                />
-                <QuickActionButton
-                  icon={<Coffee className="size-4" />}
-                  label="Life stuff"
-                />
-                <QuickActionButton
-                  icon={<Lightbulb className="size-4" />}
-                  label="Claude's choice"
-                />
               </div>
             </div>
           </div>
@@ -233,13 +226,28 @@ export function ChatInterface() {
                   >
                     <div
                       className={cn(
-                        "rounded-2xl px-5 py-3 text-[15px] leading-relaxed shadow-sm",
+                        "rounded-2xl px-5 py-3 text-[15px] leading-relaxed shadow-sm whitespace-pre-wrap",
                         message.role === "user"
                           ? "bg-muted text-foreground"
                           : "bg-card border border-border text-foreground",
                       )}
                     >
-                      {message.content}
+                      {message.role === "assistant" &&
+                      message.content === "" &&
+                      isLoading ? (
+                        <div className="flex items-center gap-2 py-1">
+                          <div className="flex gap-1">
+                            <span className="size-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:-0.3s]"></span>
+                            <span className="size-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:-0.15s]"></span>
+                            <span className="size-1.5 rounded-full bg-primary/40 animate-bounce"></span>
+                          </div>
+                          <span className="text-sm italic text-muted-foreground animate-pulse">
+                            Claude is thinking...
+                          </span>
+                        </div>
+                      ) : (
+                        message.content
+                      )}
                     </div>
                   </div>
                 </div>
@@ -250,38 +258,43 @@ export function ChatInterface() {
 
         {/* Input for Active Chat */}
         {!isHome && (
-          <div className="p-4 md:p-6 bg-background border-t border-border animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="p-4 md:p-6 bg-background animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="max-w-3xl mx-auto relative">
-              <div className="relative flex items-end gap-2 p-2 bg-muted/50 border border-border rounded-2xl focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+              <div className="relative flex items-end gap-2 p-2 bg-muted/30 border border-border rounded-2xl focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
                 <Button
                   variant="ghost"
                   size="icon"
                   className="size-9 rounded-xl text-muted-foreground hover:text-foreground"
                 >
-                  <Paperclip className="size-5" />
+                  <Plus className="size-5" />
                 </Button>
                 <Textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Message Claude..."
-                  className="flex-1 min-h-[44px] max-h-[200px] bg-transparent border-none focus-visible:ring-0 resize-none py-3 px-1 text-base shadow-none"
+                  className="flex-1 min-h-[80px] max-h-[300px] bg-transparent border-none focus-visible:ring-0 resize-none py-3 px-1 text-xl shadow-none"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       handleSend();
                     }
                   }}
+                  disabled={isLoading}
                 />
                 <Button
                   onClick={handleSend}
-                  disabled={!input.trim()}
+                  disabled={!input.trim() || isLoading}
                   size="icon"
                   className="size-9 rounded-xl shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:bg-muted"
                 >
-                  <Send className="size-4" />
+                  {isLoading ? (
+                    <div className="size-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
+                  ) : (
+                    <Send className="size-4" />
+                  )}
                 </Button>
               </div>
-              <p className="mt-2 text-center text-[10px] text-muted-foreground">
+              <p className="mt-2 text-center text-xs text-muted-foreground">
                 Claude can make mistakes. Please double-check responses.
               </p>
             </div>
@@ -289,24 +302,5 @@ export function ChatInterface() {
         )}
       </main>
     </div>
-  );
-}
-
-function QuickActionButton({
-  icon,
-  label,
-}: {
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <Button
-      variant="outline"
-      size="sm"
-      className="h-10 px-4 rounded-xl bg-muted/30 border-border/50 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border transition-all"
-    >
-      <span className="mr-2 text-muted-foreground/70">{icon}</span>
-      {label}
-    </Button>
   );
 }

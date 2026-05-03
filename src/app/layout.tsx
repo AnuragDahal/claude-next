@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 };
 
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { ChatProvider } from "@/context/chat-context";
 
 export default function RootLayout({
   children,
@@ -32,7 +33,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <TooltipProvider>
-          <SidebarProvider>{children}</SidebarProvider>
+          <ChatProvider>
+            <SidebarProvider>{children}</SidebarProvider>
+          </ChatProvider>
         </TooltipProvider>
       </body>
     </html>

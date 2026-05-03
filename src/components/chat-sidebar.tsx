@@ -47,10 +47,12 @@ import {
 } from "lucide-react";
 import React from "react";
 import { SearchCommand } from "./search-command";
+import { useChatContext } from "@/context/chat-context";
 
 export function ChatSidebar() {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const { state, toggleSidebar } = useSidebar();
+  const { resetChat } = useChatContext();
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -76,7 +78,7 @@ export function ChatSidebar() {
         {state === "expanded" && (
           <h1
             className="text-2xl font-serif font-medium tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => window.dispatchEvent(new Event('reset-chat'))}
+            onClick={resetChat}
           >
             Claude
           </h1>
@@ -106,7 +108,7 @@ export function ChatSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton
                 tooltip="New chat"
-                onClick={() => window.dispatchEvent(new Event('reset-chat'))}
+                onClick={resetChat}
                 className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer"
               >
                 <div className="w-6 flex items-center justify-center shrink-0">

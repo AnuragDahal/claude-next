@@ -44,6 +44,23 @@ export function ChatInterface() {
     }
   }, []);
 
+  React.useEffect(() => {
+    const handleReset = () => {
+      setMessages([]);
+      setInput("");
+      const textareas = document.querySelectorAll("textarea");
+      textareas.forEach((t) => (t.style.height = ""));
+    };
+    window.addEventListener("reset-chat", handleReset);
+    return () => window.removeEventListener("reset-chat", handleReset);
+  }, []);
+
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 300)}px`;
+  };
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -55,6 +72,13 @@ export function ChatInterface() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+
+    // Reset textarea heights after sending
+    setTimeout(() => {
+      const textareas = document.querySelectorAll("textarea");
+      textareas.forEach((t) => (t.style.height = ""));
+    }, 0);
+
     setIsLoading(true);
 
     // Simulate thinking delay
@@ -130,9 +154,9 @@ export function ChatInterface() {
               <div className="relative group bg-card border border-border rounded-[28px] p-1.5 transition-all hover:border-border/80 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
                 <Textarea
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={handleInput}
                   placeholder="How can I help you today?"
-                  className="w-full min-h-[100px] bg-transparent border-none focus-visible:ring-0 resize-none py-5 px-6 text-2xl placeholder:text-muted-foreground/60 leading-tight shadow-none"
+                  className="w-full min-h-[100px] max-h-[300px] overflow-y-auto bg-transparent border-none focus-visible:ring-0 resize-none py-5 px-6 text-base md:text-lg placeholder:text-muted-foreground/60 leading-relaxed shadow-none"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -140,6 +164,7 @@ export function ChatInterface() {
                     }
                   }}
                   disabled={isLoading}
+                  rows={1}
                 />
                 <div className="flex items-center justify-between px-4 py-2 border-t border-border/5">
                   <div className="flex items-center gap-1">
@@ -267,9 +292,9 @@ export function ChatInterface() {
                 </Button>
                 <Textarea
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={handleInput}
                   placeholder="Message Claude..."
-                  className="flex-1 min-h-[80px] max-h-[300px] bg-transparent border-none focus-visible:ring-0 resize-none py-3 px-1 text-xl shadow-none"
+                  className="flex-1 min-h-[80px] max-h-[300px] overflow-y-auto bg-transparent border-none focus-visible:ring-0 resize-none py-3 px-1 text-base md:text-lg placeholder:text-muted-foreground/60 leading-relaxed shadow-none"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -277,6 +302,7 @@ export function ChatInterface() {
                     }
                   }}
                   disabled={isLoading}
+                  rows={1}
                 />
                 <Button
                   onClick={handleSend}

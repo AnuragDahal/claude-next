@@ -35,6 +35,20 @@ interface Message {
 export function ChatInterface() {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [input, setInput] = React.useState("");
+  const [greeting, setGreeting] = React.useState("Good evening");
+
+  React.useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      setGreeting("Good morning");
+    } else if (hour >= 12 && hour < 17) {
+      setGreeting("Good afternoon");
+    } else if (hour >= 17 && hour < 21) {
+      setGreeting("Good evening");
+    } else {
+      setGreeting("Good night");
+    }
+  }, []);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -105,7 +119,7 @@ export function ChatInterface() {
                 <Sparkles className="size-8 text-primary-foreground" />
               </div>
               <h1 className="text-4xl md:text-5xl font-serif font-medium tracking-tight">
-                Good evening, Anurag
+                {greeting}, Anurag
               </h1>
             </div>
 

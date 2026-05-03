@@ -1,48 +1,38 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import {
   ArrowUp,
   AudioLines,
   ChevronDown,
   MoreHorizontal,
-  Paperclip,
   Plus,
   Send,
   Sparkles,
   User,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
+import React from "react";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
+import { getGreeting } from "@/lib/utils/greeting";
+
+import { useChat } from "@/hooks/use-chat";
 
 export function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [greeting, setGreeting] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    messages,
+    setMessages,
+    input,
+    setInput,
+    isLoading,
+    handleInput,
+    handleSend,
+  } = useChat();
 
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) {
-      setGreeting("Good morning");
-    } else if (hour >= 12 && hour < 17) {
-      setGreeting("Good afternoon");
-    } else if (hour >= 17 && hour < 21) {
-      setGreeting("Good evening");
-    } else {
-      setGreeting("Good night");
-    }
-  }, []);
+  const greeting = getGreeting();
 
   React.useEffect(() => {
     const handleReset = () => {
@@ -53,66 +43,7 @@ export function ChatInterface() {
     };
     window.addEventListener("reset-chat", handleReset);
     return () => window.removeEventListener("reset-chat", handleReset);
-  }, []);
-
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    e.target.style.height = "auto";
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 300)}px`;
-  };
-
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input,
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-
-    // Reset textarea heights after sending
-    setTimeout(() => {
-      const textareas = document.querySelectorAll("textarea");
-      textareas.forEach((t) => (t.style.height = ""));
-    }, 0);
-
-    setIsLoading(true);
-
-    // Simulate thinking delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const assistantId = (Date.now() + 1).toString();
-    const assistantMessage: Message = {
-      id: assistantId,
-      role: "assistant",
-      content: "",
-    };
-
-    setMessages((prev) => [...prev, assistantMessage]);
-
-    const fullResponse =
-      "I'm a Claude clone UI built with shadcn and Next.js. I've been updated to support simulated streaming and a more dynamic interface! How can I help you further today?";
-
-    let currentText = "";
-    const words = fullResponse.split(" ");
-
-    for (let i = 0; i < words.length; i++) {
-      currentText += (i === 0 ? "" : " ") + words[i];
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === assistantId ? { ...msg, content: currentText } : msg,
-        ),
-      );
-      await new Promise((resolve) =>
-        setTimeout(resolve, 50 + Math.random() * 50),
-      );
-    }
-
-    setIsLoading(false);
-  };
+  }, [setMessages, setInput]);
 
   const isHome = messages.length === 0;
 

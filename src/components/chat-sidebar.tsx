@@ -59,11 +59,13 @@ export function ChatSidebar() {
           </h1>
         </div>
 
-        <SidebarMenu className="gap-2">
+        <SidebarMenu className="gap-1">
           <SidebarMenuItem>
-            <SidebarMenuButton className="h-11 gap-3 rounded-xl hover:bg-sidebar-accent transition-all duration-200">
-              <div className="size-6 rounded-full border border-border flex items-center justify-center bg-sidebar">
-                <Plus className="size-4" />
+            <SidebarMenuButton className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent transition-all duration-200 px-2">
+              <div className="w-6 flex items-center justify-center">
+                <div className="size-6 rounded-full border border-border flex items-center justify-center bg-sidebar shadow-sm">
+                  <Plus className="size-3.5" />
+                </div>
               </div>
               <span className="font-medium">New chat</span>
             </SidebarMenuButton>
@@ -72,9 +74,11 @@ export function ChatSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => setSearchOpen(true)}
-              className="h-11 gap-3 rounded-xl hover:bg-sidebar-accent transition-all duration-200"
+              className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent transition-all duration-200 px-2"
             >
-              <Search className="size-5" />
+              <div className="w-6 flex items-center justify-center">
+                <Search className="size-5" />
+              </div>
               <span className="font-medium text-muted-foreground/80">
                 Search
               </span>

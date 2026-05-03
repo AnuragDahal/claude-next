@@ -46,6 +46,7 @@ import React from "react";
 import { SearchCommand } from "./search-command";
 import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export function ChatSidebar() {
@@ -56,21 +57,34 @@ export function ChatSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
       <SearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
 
-      <SidebarHeader className="px-4 pt-6 pb-0 flex flex-col gap-4">
+      <SidebarHeader className={cn("pt-6 pb-0 flex flex-row items-center gap-4", state === "expanded" ? "px-4 justify-between" : "px-2 justify-center")}>
         {state === "expanded" && (
-          <div>
-            <h1 className="text-2xl font-serif font-semibold tracking-tight">
-              Claude
-            </h1>
-          </div>
+          <h1 className="text-2xl font-serif font-semibold tracking-tight">
+            Claude
+          </h1>
         )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
+              onClick={toggleSidebar}
+            >
+              <PanelLeft className="size-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            {state === "expanded" ? "Close sidebar" : "Open sidebar"}
+          </TooltipContent>
+        </Tooltip>
       </SidebarHeader>
 
       <SidebarContent className="scrollbar-none pt-2">
         <SidebarGroup className={state === "expanded" ? "px-4" : "px-2"}>
           <SidebarMenu className={cn(state === "expanded" ? "" : "items-center", "gap-1")}>
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton tooltip="New chat" className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer">
                 <div className="w-6 flex items-center justify-center shrink-0">
                   <div className="size-6 rounded-full border border-border flex items-center justify-center bg-sidebar shadow-sm shrink-0">
                     <Plus className="size-3.5" />
@@ -82,8 +96,9 @@ export function ChatSidebar() {
 
             <SidebarMenuItem>
               <SidebarMenuButton
+                tooltip="Search"
                 onClick={() => setSearchOpen(true)}
-                className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center"
+                className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer"
               >
                 <div className="w-6 flex items-center justify-center shrink-0">
                   <Search className="size-5 shrink-0" />
@@ -95,7 +110,7 @@ export function ChatSidebar() {
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton tooltip="Chats" className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer">
                 <div className="w-6 flex items-center justify-center shrink-0">
                   <MessageSquare className="size-5" />
                 </div>
@@ -106,7 +121,7 @@ export function ChatSidebar() {
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton tooltip="Projects" className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer">
                 <div className="w-6 flex items-center justify-center shrink-0">
                   <Layers className="size-5" />
                 </div>
@@ -117,7 +132,7 @@ export function ChatSidebar() {
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton tooltip="Artifacts" className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer">
                 <div className="w-6 flex items-center justify-center shrink-0">
                   <Box className="size-5" />
                 </div>
@@ -128,7 +143,7 @@ export function ChatSidebar() {
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent justify-between px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton tooltip="Code" className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent justify-between px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer">
                 <div className="flex items-center gap-3 group-data-[collapsible=icon]:gap-0">
                   <div className="w-6 flex items-center justify-center shrink-0">
                     <Code2 className="size-5" />
@@ -149,7 +164,7 @@ export function ChatSidebar() {
             </SidebarMenuItem>
 
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton tooltip="Customize" className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer">
                 <div className="w-6 flex items-center justify-center shrink-0">
                   <Briefcase className="size-5" />
                 </div>
@@ -180,7 +195,7 @@ export function ChatSidebar() {
                 "Upskilling in system design and ...",
               ].map((chat, i) => (
                 <SidebarMenuItem key={i}>
-                  <SidebarMenuButton className="h-9 px-2 rounded-lg hover:bg-sidebar-accent text-sm font-medium text-muted-foreground/90 transition-colors">
+                  <SidebarMenuButton tooltip={chat} className="h-9 px-2 rounded-lg hover:bg-sidebar-accent text-sm font-medium text-muted-foreground/90 transition-colors cursor-pointer">
                     <span className="truncate">{chat}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

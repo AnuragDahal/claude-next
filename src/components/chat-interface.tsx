@@ -95,10 +95,7 @@ export function ChatInterface() {
   return (
     <div className="flex flex-col h-screen w-full bg-background transition-colors duration-500">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 bg-transparent sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <SidebarTrigger />
-        </div>
+      <header className="flex items-center justify-end px-4 py-3 bg-transparent sticky top-0 z-10 min-h-[56px]">
         <div className="flex items-center gap-2">
           {isHome && (
             <Button

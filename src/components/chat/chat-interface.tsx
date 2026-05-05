@@ -7,6 +7,7 @@ import { useChat } from "@/hooks/use-chat";
 import { useScroll } from "@/hooks/use-scroll";
 import { InputBar } from "@/components/chat/input-bar";
 import { MessageList } from "@/components/chat/message-list";
+import { SidebarTrigger } from "../ui/sidebar";
 
 export function ChatInterface() {
   const { messages, input, isLoading, handleInput, handleSend } = useChat();
@@ -17,7 +18,8 @@ export function ChatInterface() {
   return (
     <div className="flex flex-col h-screen w-full bg-background transition-colors duration-500">
       {/* Header */}
-      <header className="flex items-center justify-end px-4 py-3 bg-transparent sticky top-0 z-10 min-h-[56px]">
+      <header className="flex items-center justify-between md:justify-end px-4 py-3 bg-transparent sticky top-0 z-10 min-h-[56px]">
+        <SidebarTrigger className="md:hidden" />
         <div className="flex items-center gap-2">
           {isHome && (
             <Button

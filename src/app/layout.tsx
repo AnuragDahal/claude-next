@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ChatProvider } from "@/context/chat-context";
+import { AuthProvider } from "@/context/auth-context";
 
 export default function RootLayout({
   children,
@@ -32,11 +33,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <TooltipProvider>
-          <ChatProvider>
-            <SidebarProvider>{children}</SidebarProvider>
-          </ChatProvider>
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <ChatProvider>
+              <SidebarProvider>{children}</SidebarProvider>
+            </ChatProvider>
+          </TooltipProvider>
+        </AuthProvider>
       </body>
     </html>
   );

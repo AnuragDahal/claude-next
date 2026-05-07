@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Claude.ai UI Template & Starter Kit
+ 
+![Claude UI Mockup](/public/assets/hero-mockup.png)
+ 
+A premium, high-fidelity UI template and starter kit inspired by the Claude.ai interface. Built with modern web technologies, this project provides a production-ready foundation for developers looking to build sophisticated AI chat applications with a focus on minimalist design and enterprise-grade aesthetics.
+ 
+> [!TIP]
+> **Why use this starter?** Skip the weeks of UI/UX development and start directly with a refined, responsive, and feature-rich interface that feels premium out of the box.
+ 
+## ✨ Key Features
+ 
+-   **Authentic Claude Experience**: Mirroring the minimalist, stone-toned aesthetic of Claude.ai.
+-   **Intelligent Chat Interface**: Modular chat components including message bubbles, input bars, and message lists.
+-   **Responsive Sidebar**: A fully collapsible and interactive sidebar with tooltips and quick navigation.
+-   **Rich Markdown Support**: Seamless rendering of Markdown content with syntax highlighting for code blocks.
+-   **Authentication Ready**: Integrated with NextAuth.js (v5 beta) for secure Google OAuth sessions.
+-   **Command Palette**: Quick navigation and actions using `Ctrl + K`.
+-   **Modern Design System**: Built using Tailwind CSS 4 and shadcn/ui for maximum flexibility and performance.
+-   **Micro-Animations**: Staggered animations and smooth transitions for a premium feel.
+ 
+## 🛠️ Tech Stack
+ 
+-   **Framework**: [Next.js 15+](https://nextjs.org) (App Router)
+-   **Styling**: [Tailwind CSS 4](https://tailwindcss.com)
+-   **Components**: [shadcn/ui](https://ui.shadcn.com)
+-   **Icons**: [Lucide React](https://lucide.dev)
+-   **Authentication**: [NextAuth.js v5](https://authjs.dev)
+-   **Animations**: [Framer Motion](https://www.framer.com/motion/) & Tailwind Animate
+-   **Markdown**: `react-markdown`, `rehype-highlight`, `remark-gfm`
+ 
+## 🚀 Getting Started
+ 
+### Prerequisites
+ 
+-   Node.js 18+ 
+-   pnpm / npm / yarn
+ 
+### Installation
+ 
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/your-username/claude-code.git
+    cd claude-code
+    ```
+ 
+2. Install dependencies:
+    ```bash
+    pnpm install
+    ```
+ 
+3. Set up environment variables:
+    Create a `.env.local` file in the root directory:
+    ```env
+    AUTH_SECRET="your-secret"
+    AUTH_GOOGLE_ID="your-google-id"
+    AUTH_GOOGLE_SECRET="your-google-secret"
+    ```
+ 
+4. Run the development server:
+    ```bash
+    pnpm dev
+    ```
+ 
+Open [http://localhost:3000](http://localhost:3000) to see the application.
+ 
+## 🎨 Customization & Extension
+ 
+This starter kit is designed to be highly extensible:
+ 
+-   **Theme Colors**: Modify the primary and stone-toned palettes in `src/app/globals.css`.
+-   **AI Integration**: Hook up your LLM (OpenAI, Anthropic, Gemini) in the `src/hooks/use-chat.ts` or via a dedicated API route in `src/app/api/chat/`.
+-   **Auth Providers**: Easily add more providers (GitHub, Discord, Credentials) in `src/lib/auth.ts`.
+-   **Components**: Leverage the pre-built `shadcn/ui` components located in `src/components/ui/` to build new pages quickly.
+ 
+## 🏗️ Project Structure
+ 
+```text
+src/
+├── app/             # App router pages and API routes
+├── components/      # Reusable UI and Chat-specific components
+├── context/         # React Context providers (Auth, Chat)
+├── hooks/           # Custom hooks for logic extraction
+├── lib/             # Utility functions and shared libraries
+└── types/           # TypeScript definitions
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ 
+## 📜 License
+ 
+This project is for educational purposes only. All branding and design rights belong to Anthropic.
+ 
+---
+ 
+Created with ❤️ by [Anurag](https://github.com/AnuragDahal)

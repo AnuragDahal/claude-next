@@ -40,19 +40,62 @@ import {
   Info,
   LogOut,
   MessageSquare,
+  Moon,
   PanelLeft,
   Plus,
   Search,
-  Settings
+  Settings,
+  Sun,
+  X
 } from "lucide-react";
 import React from "react";
+import { useTheme } from "next-themes";
 import { SearchCommand } from "./search-command";
 import { useChatContext } from "@/context/chat-context";
+
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return <div className="size-8" />;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
+          {theme === "dark" ? (
+            <Sun className="size-5" />
+          ) : (
+            <Moon className="size-5" />
+          )}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="right">
+        Switch to {theme === "dark" ? "light" : "dark"} mode
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 export function ChatSidebar() {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const { state, toggleSidebar } = useSidebar();
-  const { resetChat } = useChatContext();
+  const { 
+    sessions, 
+    activeSessionId, 
+    switchSession, 
+    deleteSession, 
+    resetChat 
+  } = useChatContext();
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -161,27 +204,36 @@ export function ChatSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
-              {[
-                "Untitled",
-                "Electromagnetics question pape...",
-                "Claude-code UI clone idea",
-                "Creating monitoring solutions",
-                "Frontend development for back...",
-                "Optimizing document analysis w...",
-                "Organizing AI questions by theo...",
-                "Machine vision fundamentals an...",
-                "Exam question organization and ...",
-                "Upskilling in system design and ...",
-              ].map((chat, i) => (
-                <SidebarMenuItem key={i}>
+              {sessions.map((session) => (
+                <SidebarMenuItem key={session.id} className="group/item">
                   <SidebarMenuButton
-                    tooltip={chat}
-                    className="h-9 px-2 rounded-lg hover:bg-sidebar-accent text-sm font-medium text-muted-foreground/90 transition-colors cursor-pointer"
+                    tooltip={session.title}
+                    onClick={() => switchSession(session.id)}
+                    className={cn(
+                      "h-9 px-2 rounded-lg hover:bg-sidebar-accent text-sm font-medium transition-colors cursor-pointer flex items-center gap-2",
+                      activeSessionId === session.id 
+                        ? "bg-sidebar-accent text-foreground" 
+                        : "text-muted-foreground/90"
+                    )}
                   >
-                    <span className="truncate">{chat}</span>
+                    <span className="truncate flex-1">{session.title}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteSession(session.id);
+                      }}
+                      className="opacity-0 group-hover/item:opacity-100 size-5 flex items-center justify-center hover:bg-muted-foreground/20 rounded-md transition-all shrink-0"
+                    >
+                      <X className="size-3" />
+                    </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {sessions.length === 0 && (
+                <div className="px-2 py-4 text-xs text-muted-foreground/60 text-center italic">
+                  No recent chats
+                </div>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -204,7 +256,7 @@ export function ChatSidebar() {
                   "cursor-pointer hover:bg-sidebar-accent/50 rounded-xl transition-colors",
                   state === "expanded"
                     ? "flex items-center justify-between w-full p-2 -m-2"
-                    : "flex justify-center p-0",
+                    : "flex flex-col items-center justify-center p-2",
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -229,6 +281,7 @@ export function ChatSidebar() {
                 </div>
                 {state === "expanded" && (
                   <div className="flex items-center gap-1">
+                    <ThemeToggle />
                     <Button
                       variant="ghost"
                       size="icon"
@@ -236,6 +289,11 @@ export function ChatSidebar() {
                     >
                       <ChevronsUpDown className="size-4" />
                     </Button>
+                  </div>
+                )}
+                {state === "collapsed" && (
+                  <div className="mt-2">
+                    <ThemeToggle />
                   </div>
                 )}
               </div>

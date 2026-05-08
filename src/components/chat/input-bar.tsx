@@ -132,7 +132,7 @@ export function InputBar({
   }
 
   return (
-    <div className="p-4 md:p-6 bg-background animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-4 md:p-6 bg-transparent animate-in fade-in slide-in-from-bottom-4 duration-500">
       <input 
         type="file" 
         multiple 
@@ -142,51 +142,68 @@ export function InputBar({
         accept="image/*,.pdf,.txt"
       />
       <div className="max-w-3xl mx-auto relative">
-        <div className="relative flex flex-col bg-muted/30 border border-border rounded-2xl focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-          {attachments.length > 0 && (
-            <div className="pt-2">
-              {renderAttachments()}
+        <div className="relative flex flex-col bg-card border border-border shadow-sm rounded-[2rem] p-1.5 transition-all hover:border-border/80 focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
+          {attachments.length > 0 && renderAttachments()}
+          <Textarea
+            value={input}
+            onChange={handleInput}
+            placeholder="Reply to Claude..."
+            className="w-full min-h-[44px] max-h-[300px] overflow-y-auto bg-transparent border-none focus-visible:ring-0 resize-none py-3 px-6 text-base placeholder:text-muted-foreground/60 leading-relaxed shadow-none"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            disabled={isLoading}
+            rows={1}
+          />
+          <div className="flex items-center justify-between px-4 py-2">
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                className="size-9 rounded-full hover:bg-muted text-muted-foreground"
+              >
+                <Plus className="size-5" />
+              </Button>
             </div>
-          )}
-          <div className="flex items-end gap-2 p-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => fileInputRef.current?.click()}
-              className="size-9 rounded-xl text-muted-foreground hover:text-foreground"
-            >
-              <Plus className="size-5" />
-            </Button>
-            <Textarea
-              value={input}
-              onChange={handleInput}
-              placeholder="Message Claude..."
-              className="flex-1 min-h-[44px] max-h-[300px] overflow-y-auto bg-transparent border-none focus-visible:ring-0 resize-none py-2.5 px-1 text-base placeholder:text-muted-foreground/60 leading-relaxed shadow-none"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              disabled={isLoading}
-              rows={1}
-            />
-            <Button
-              onClick={handleSend}
-              disabled={(!input.trim() && attachments.length === 0) || isLoading}
-              size="icon"
-              className="size-9 rounded-xl shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:bg-muted"
-            >
-              {isLoading ? (
-                <div className="size-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
-              ) : (
-                <Send className="size-4" />
-              )}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1.5 rounded-xl px-3 text-muted-foreground hover:text-foreground hover:bg-muted"
+              >
+                <span className="text-xs font-medium">Sonnet 4.6</span>
+                <ChevronDown className="size-3.5" />
+              </Button>
+              <div className="h-4 w-px bg-border/20 mx-1" />
+              <Button
+                onClick={handleSend}
+                disabled={(!input.trim() && attachments.length === 0) || isLoading}
+                variant={input.trim() || attachments.length > 0 ? "default" : "ghost"}
+                size="icon"
+                className={cn(
+                  "size-9 rounded-full transition-all duration-200",
+                  (input.trim() || attachments.length > 0)
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "hover:bg-muted text-muted-foreground",
+                )}
+              >
+                {isLoading ? (
+                  <div className="size-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                ) : (input.trim() || attachments.length > 0) ? (
+                  <ArrowUp className="size-5" />
+                ) : (
+                  <AudioLines className="size-5" />
+                )}
+              </Button>
+            </div>
           </div>
         </div>
-        <p className="mt-2 text-center text-xs text-muted-foreground">
-          Claude can make mistakes. Please double-check responses.
+        <p className="mt-3 text-center text-[11px] text-muted-foreground/60 tracking-tight">
+          Claude is AI and can make mistakes. Please double-check responses.
         </p>
       </div>
     </div>

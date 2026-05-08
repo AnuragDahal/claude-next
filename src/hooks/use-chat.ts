@@ -80,39 +80,63 @@ export function useChat() {
 
     setIsLoading(true);
 
-    // TODO: Switch model or provider here — swap Gemini for Anthropic/OpenAI if needed
-    // Simulate thinking delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // TODO: Switch model or provider here — swap Gemini for Anthropic/OpenAI if needed
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          messages: [...messages, userMessage],
+          // attachments are handled locally for now
+        }),
+      });
 
-    const assistantId = (Date.now() + 1).toString();
-    const assistantMessage: Message = {
-      id: assistantId,
-      role: "assistant",
-      content: "",
-    };
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to get response from AI");
+      }
 
-    setMessages((prev) => [...prev, assistantMessage]);
+      const assistantId = (Date.now() + 1).toString();
+      const assistantMessage: Message = {
+        id: assistantId,
+        role: "assistant",
+        content: "",
+      };
 
-    const fullResponse =
-      "I'm a Claude clone UI built with shadcn and Next.js. I've been updated to support simulated streaming and a more dynamic interface! How can I help you further today?";
+      setMessages((prev) => [...prev, assistantMessage]);
 
-    let currentText = "";
-    const words = fullResponse.split(" ");
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedContent = "";
 
-    for (let i = 0; i < words.length; i++) {
-      currentText += (i === 0 ? "" : " ") + words[i];
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === assistantId ? { ...msg, content: currentText } : msg,
-        ),
-      );
-      await new Promise((resolve) =>
-        setTimeout(resolve, 50 + Math.random() * 50),
-      );
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value, { stream: true });
+          accumulatedContent += chunk;
+
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantId ? { ...msg, content: accumulatedContent } : msg,
+            ),
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Streaming error:", error);
+      // Fallback message
+      const errorId = (Date.now() + 2).toString();
+      setMessages((prev) => [...prev, {
+        id: errorId,
+        role: "assistant",
+        content: "Sorry, I encountered an error. Please make sure your GEMINI_API_KEY is set in .env.local."
+      }]);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
-  }, [input, isLoading]);
+  }, [input, attachments, isLoading, messages, setMessages]);
 
   return {
     messages,

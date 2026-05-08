@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "highlight.js/styles/github-dark.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -55,23 +56,23 @@
 }
 
 :root {
-  --background: #f5f0e8;
+  --background: #fbfaf8;
   --foreground: #1a1814;
-  --card: #f5f0e8;
+  --card: #fbfaf8;
   --card-foreground: #1a1814;
   --popover: #ffffff;
   --popover-foreground: #1a1814;
   --primary: #d97757;
   --primary-foreground: #ffffff;
-  --secondary: #e5e0d8;
+  --secondary: #f3f1ec;
   --secondary-foreground: #1a1814;
-  --muted: #e5e0d8;
+  --muted: #f3f1ec;
   --muted-foreground: #6b6359;
-  --accent: #e5e0d8;
+  --accent: #f3f1ec;
   --accent-foreground: #1a1814;
   --destructive: #ef4444;
-  --border: #d5d0c8;
-  --input: #d5d0c8;
+  --border: #e8e6e1;
+  --input: #e8e6e1;
   --ring: #d97757;
   --chart-1: #d97757;
   --chart-2: #6b6359;
@@ -79,13 +80,13 @@
   --chart-4: #3a352e;
   --chart-5: #2a251e;
   --radius: 0.75rem;
-  --sidebar: #f0ebe3;
+  --sidebar: #f7f5f2;
   --sidebar-foreground: #1a1814;
   --sidebar-primary: #d97757;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e5e0d8;
+  --sidebar-accent: #f3f1ec;
   --sidebar-accent-foreground: #1a1814;
-  --sidebar-border: #d5d0c8;
+  --sidebar-border: #e8e6e1;
   --sidebar-ring: #d97757;
   --sidebar-width: 336px;
 }
@@ -145,5 +146,24 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+    background-clip: content-box;
   }
 }

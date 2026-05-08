@@ -19,6 +19,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
@@ -46,7 +47,7 @@ import {
   Search,
   Settings,
   Sun,
-  X
+  X,
 } from "lucide-react";
 import React from "react";
 import { useTheme } from "next-themes";
@@ -89,13 +90,8 @@ function ThemeToggle() {
 export function ChatSidebar() {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const { state, toggleSidebar } = useSidebar();
-  const { 
-    sessions, 
-    activeSessionId, 
-    switchSession, 
-    deleteSession, 
-    resetChat 
-  } = useChatContext();
+  const { sessions, activeSessionId, switchSession, deleteSession, resetChat } =
+    useChatContext();
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -209,24 +205,22 @@ export function ChatSidebar() {
                   <SidebarMenuButton
                     tooltip={session.title}
                     onClick={() => switchSession(session.id)}
-                    className={cn(
-                      "h-9 px-2 rounded-lg hover:bg-sidebar-accent text-sm font-medium transition-colors cursor-pointer flex items-center gap-2",
-                      activeSessionId === session.id 
-                        ? "bg-sidebar-accent text-foreground" 
-                        : "text-muted-foreground/90"
-                    )}
+                    isActive={activeSessionId === session.id}
+                    className="h-9 px-2 rounded-lg cursor-pointer"
                   >
                     <span className="truncate flex-1">{session.title}</span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteSession(session.id);
-                      }}
-                      className="opacity-0 group-hover/item:opacity-100 size-5 flex items-center justify-center hover:bg-muted-foreground/20 rounded-md transition-all shrink-0"
-                    >
-                      <X className="size-3" />
-                    </button>
                   </SidebarMenuButton>
+                  <SidebarMenuAction
+                    showOnHover
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteSession(session.id);
+                    }}
+                    className="size-5"
+                  >
+                    <X className="size-3" />
+                    <span className="sr-only">Delete chat</span>
+                  </SidebarMenuAction>
                 </SidebarMenuItem>
               ))}
               {sessions.length === 0 && (

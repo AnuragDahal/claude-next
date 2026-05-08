@@ -10,7 +10,16 @@ import { MessageList } from "@/components/chat/message-list";
 import { SidebarTrigger } from "../ui/sidebar";
 
 export function ChatInterface() {
-  const { messages, input, isLoading, handleInput, handleSend } = useChat();
+  const { 
+    messages, 
+    input, 
+    isLoading, 
+    attachments,
+    addAttachments,
+    removeAttachment,
+    handleInput, 
+    handleSend 
+  } = useChat();
   const messagesEndRef = useScroll(messages);
   const greeting = getGreeting();
   const isHome = messages.length === 0;
@@ -54,6 +63,9 @@ export function ChatInterface() {
               input={input}
               isLoading={isLoading}
               isHome={true}
+              attachments={attachments}
+              addAttachments={addAttachments}
+              removeAttachment={removeAttachment}
               handleInput={handleInput}
               handleSend={handleSend}
             />
@@ -73,6 +85,9 @@ export function ChatInterface() {
             input={input}
             isLoading={isLoading}
             isHome={false}
+            attachments={attachments}
+            addAttachments={addAttachments}
+            removeAttachment={removeAttachment}
             handleInput={handleInput}
             handleSend={handleSend}
           />

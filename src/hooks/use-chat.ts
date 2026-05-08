@@ -1,11 +1,26 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { type Message } from "@/lib/types";
 import { useChatContext } from "@/context/chat-context";
+
+export interface Attachment {
+  file: File;
+  preview: string;
+  type: string;
+  name: string;
+}
 
 export function useChat() {
   const { messages, setMessages } = useChatContext();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+
+  // Cleanup object URLs
+  useEffect(() => {
+    return () => {
+      attachments.forEach((a) => URL.revokeObjectURL(a.preview));
+    };
+  }, [attachments]);
 
   const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -13,17 +28,49 @@ export function useChat() {
     e.target.style.height = `${Math.min(e.target.scrollHeight, 300)}px`;
   }, []);
 
+  const addAttachments = useCallback((files: FileList) => {
+    const newAttachments: Attachment[] = [];
+    Array.from(files).forEach((file) => {
+      const preview = URL.createObjectURL(file);
+      newAttachments.push({
+        file,
+        preview,
+        type: file.type,
+        name: file.name,
+      });
+    });
+    setAttachments((prev) => [...prev, ...newAttachments]);
+  }, []);
+
+  const removeAttachment = useCallback((index: number) => {
+    setAttachments((prev) => {
+      const newAttachments = [...prev];
+      URL.revokeObjectURL(newAttachments[index].preview);
+      newAttachments.splice(index, 1);
+      return newAttachments;
+    });
+  }, []);
+
   const handleSend = useCallback(async () => {
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && attachments.length === 0) || isLoading) return;
+
+    // TODO: Upload file to storage (Supabase, S3, etc.) before sending to LLM
+    const messageAttachments = attachments.map(a => ({
+      preview: a.preview,
+      type: a.type,
+      name: a.name
+    }));
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
       content: input,
+      attachments: messageAttachments.length > 0 ? messageAttachments : undefined,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setAttachments([]);
 
     // Reset textarea heights after sending
     setTimeout(() => {
@@ -33,7 +80,7 @@ export function useChat() {
 
     setIsLoading(true);
 
-    // TODO: Replace this block with your LLM API call (Anthropic SDK, Vercel AI SDK, etc.)
+    // TODO: Switch model or provider here — swap Gemini for Anthropic/OpenAI if needed
     // Simulate thinking delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -73,6 +120,9 @@ export function useChat() {
     input,
     setInput,
     isLoading,
+    attachments,
+    addAttachments,
+    removeAttachment,
     handleInput,
     handleSend,
   };

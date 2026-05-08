@@ -1,15 +1,15 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
-import { type Message } from "@/lib/types";
-import { MessageContent } from "./message-content";
-import {Sparkles, User} from "lucide-react";
+import {Avatar, AvatarFallback} from "@/components/ui/avatar";
+import {cn} from "@/lib/utils";
+import {type Message} from "@/lib/types";
+import {MessageContent} from "./message-content";
+import {Paperclip, Sparkles, User} from "lucide-react";
 
 interface MessageBubbleProps {
   message: Message;
   isLoading?: boolean;
 }
 
-export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
+export function MessageBubble({message, isLoading}: MessageBubbleProps) {
   return (
     <>
       <div
@@ -42,6 +42,22 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
             message.role === "user" ? "items-end" : "items-start",
           )}
         >
+          {message.attachments && message.attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-1">
+              {message.attachments.map((attachment, idx) => (
+                attachment.type.startsWith("image/") ? (
+                  <div key={idx} className="rounded-xl border border-border overflow-hidden max-w-sm">
+                    <img src={attachment.preview} alt={attachment.name} className="w-full h-auto object-contain" />
+                  </div>
+                ) : (
+                  <div key={idx} className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-muted/50 text-xs font-medium">
+                    <Paperclip className="size-3" />
+                    <span>{attachment.name}</span>
+                  </div>
+                )
+              ))}
+            </div>
+          )}
           <div
             className={cn(
               "rounded-2xl px-5 py-3 text-[15px] leading-relaxed shadow-sm whitespace-pre-wrap",

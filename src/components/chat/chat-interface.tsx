@@ -11,15 +11,15 @@ import { SidebarTrigger } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
 
 export function ChatInterface() {
-  const { 
-    messages, 
-    input, 
-    isLoading, 
+  const {
+    messages,
+    input,
+    isLoading,
     attachments,
     addAttachments,
     removeAttachment,
-    handleInput, 
-    handleSend 
+    handleInput,
+    handleSend,
   } = useChat();
   const messagesEndRef = useScroll(messages);
   const greeting = getGreeting();
@@ -28,8 +28,8 @@ export function ChatInterface() {
   return (
     <div className="flex flex-col h-screen w-full bg-background transition-colors duration-500 overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 bg-transparent sticky top-0 z-30 min-h-[56px]">
-        <SidebarTrigger />
+      <header className="flex items-center justify-between md:justify-end px-4 py-3 bg-transparent sticky top-0 z-30 min-h-[56px]">
+        <SidebarTrigger className="md:hidden" />
         <div className="flex items-center gap-2">
           {isHome && (
             <Button
@@ -40,7 +40,11 @@ export function ChatInterface() {
               Get Pro
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full text-muted-foreground hover:text-foreground"
+          >
             <MoreHorizontal className="size-5" />
           </Button>
         </div>

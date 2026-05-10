@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type Message } from "@/lib/types";
 import { MessageBubble } from "./message-bubble";
@@ -57,9 +57,9 @@ export function MessageList({ messages, isLoading, messagesEndRef }: MessageList
           variant="outline"
           size="icon"
           onClick={scrollToBottom}
-          className="fixed bottom-28 md:bottom-32 left-1/2 -translate-x-1/2 size-10 rounded-full bg-background/80 backdrop-blur-sm border-border shadow-md z-20 flex items-center justify-center hover:bg-background transition-all animate-in fade-in zoom-in"
+          className="fixed bottom-[130px] left-1/2 -translate-x-1/2 size-9 rounded-full bg-background border-border shadow-lg z-20 flex items-center justify-center hover:bg-background transition-all animate-in fade-in zoom-in"
         >
-          <ChevronDown className="size-5" />
+          <ArrowDown className="size-4 text-muted-foreground" />
         </Button>
       )}
     </div>

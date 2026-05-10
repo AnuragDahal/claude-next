@@ -19,7 +19,6 @@ export const metadata: Metadata = {
 };
 
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { ChatProvider } from "@/context/chat-context";
 import { AuthProvider } from "@/context/auth-context";
 import { ThemeProvider } from "next-themes";
 
@@ -38,9 +37,7 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <TooltipProvider>
-              <ChatProvider>
-                <SidebarProvider>{children}</SidebarProvider>
-              </ChatProvider>
+              <SidebarProvider>{children}</SidebarProvider>
             </TooltipProvider>
           </ThemeProvider>
         </AuthProvider>

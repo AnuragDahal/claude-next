@@ -52,7 +52,7 @@ import {
 import React from "react";
 import { useTheme } from "next-themes";
 import { SearchCommand } from "./search-command";
-import { useChatContext } from "@/context/chat-context";
+import { useChatStore } from "@/store/chat-store";
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -90,8 +90,8 @@ function ThemeToggle() {
 export function ChatSidebar() {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const { state, toggleSidebar } = useSidebar();
-  const { sessions, activeSessionId, switchSession, deleteSession, resetChat } =
-    useChatContext();
+  const { sessions, activeSessionId, switchSession, deleteSession, createSession } =
+    useChatStore();
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -117,7 +117,7 @@ export function ChatSidebar() {
         {state === "expanded" && (
           <h1
             className="text-2xl font-serif font-medium tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={resetChat}
+            onClick={createSession}
           >
             Claude
           </h1>
@@ -147,7 +147,7 @@ export function ChatSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton
                 tooltip="New chat"
-                onClick={resetChat}
+                onClick={createSession}
                 className="h-10 gap-3 rounded-xl hover:bg-sidebar-accent px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center cursor-pointer"
               >
                 <div className="w-6 flex items-center justify-center shrink-0">

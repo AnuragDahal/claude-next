@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { type Message } from "@/lib/types";
-import { useChatContext } from "@/context/chat-context";
+import { useChatStore } from "@/store/chat-store";
+import api from "@/lib/axios";
 
 export interface Attachment {
   file: File;
@@ -10,7 +11,10 @@ export interface Attachment {
 }
 
 export function useChat() {
-  const { messages, setMessages } = useChatContext();
+  const { addMessage, updateMessage, getActiveSession } = useChatStore();
+  const activeSession = getActiveSession();
+  const messages = activeSession?.messages || [];
+  
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -68,7 +72,7 @@ export function useChat() {
       attachments: messageAttachments.length > 0 ? messageAttachments : undefined,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(userMessage);
     setInput("");
     setAttachments([]);
 
@@ -82,20 +86,6 @@ export function useChat() {
 
     try {
       // TODO: Switch model or provider here — swap Gemini for Anthropic/OpenAI if needed
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          messages: [...messages, userMessage],
-          // attachments are handled locally for now
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to get response from AI");
-      }
-
       const assistantId = (Date.now() + 1).toString();
       const assistantMessage: Message = {
         id: assistantId,
@@ -103,44 +93,33 @@ export function useChat() {
         content: "",
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      addMessage(assistantMessage);
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedContent = "";
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          
-          const chunk = decoder.decode(value, { stream: true });
-          accumulatedContent += chunk;
-
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === assistantId ? { ...msg, content: accumulatedContent } : msg,
-            ),
-          );
+      await api.post("/api/chat", { 
+        messages: [...messages, userMessage],
+      }, {
+        responseType: "text",
+        onDownloadProgress: (progressEvent) => {
+          const content = progressEvent.event.target.responseText;
+          updateMessage(assistantId, content);
         }
-      }
+      });
     } catch (error) {
       console.error("Streaming error:", error);
       // Fallback message
       const errorId = (Date.now() + 2).toString();
-      setMessages((prev) => [...prev, {
+      addMessage({
         id: errorId,
         role: "assistant",
         content: "Sorry, I encountered an error. Please make sure your GEMINI_API_KEY is set in .env.local."
-      }]);
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [input, attachments, isLoading, messages, setMessages]);
+  }, [input, attachments, isLoading, messages, addMessage, updateMessage]);
 
   return {
     messages,
-    setMessages,
     input,
     setInput,
     isLoading,

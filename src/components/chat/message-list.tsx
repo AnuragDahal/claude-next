@@ -1,6 +1,6 @@
-import React from "react";
-import { Sparkles } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { type Message } from "@/lib/types";
 import { MessageBubble } from "./message-bubble";
 
@@ -11,35 +11,57 @@ interface MessageListProps {
 }
 
 export function MessageList({ messages, isLoading, messagesEndRef }: MessageListProps) {
-  const lastMessage = messages[messages.length - 1];
-  const isThinking = isLoading && (lastMessage?.role === "user" || (lastMessage?.role === "assistant" && !lastMessage.content));
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (containerRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+        const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+        setShowScrollButton(!isNearBottom);
+      }
+    };
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
+    }
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
-    <div className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar">
-      <div className="max-w-3xl mx-auto py-10 px-4 md:px-0 flex flex-col gap-8">
-        {messages.map((message) => (
+    <div ref={containerRef} className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar relative">
+      <div className="max-w-3xl mx-auto pt-16 pb-10 px-4 md:px-0 flex flex-col gap-10">
+        {messages.map((message, index) => (
           <MessageBubble 
             key={message.id} 
             message={message} 
-            isLoading={isLoading} 
+            isLoading={isLoading && index === messages.length - 1} 
           />
         ))}
         
-        {isThinking && (
-          <div className="flex items-start gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-1">
-              <Sparkles className="size-4 text-primary animate-pulse" />
-            </div>
-            <div className="flex-1 py-1">
-              <div className="text-muted-foreground text-[15px] italic animate-pulse">
-                Claude is thinking...
-              </div>
-            </div>
-          </div>
-        )}
-        
         <div ref={messagesEndRef} className="h-32 shrink-0" />
       </div>
+
+      {showScrollButton && (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={scrollToBottom}
+          className="fixed bottom-32 right-8 md:right-auto md:left-[calc(50%+380px)] -translate-x-1/2 size-10 rounded-full bg-background/80 backdrop-blur-sm border-border shadow-md z-20 flex items-center justify-center hover:bg-background transition-all animate-in fade-in zoom-in"
+        >
+          <ChevronDown className="size-5" />
+        </Button>
+      )}
     </div>
   );
 }

@@ -11,27 +11,27 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({message, isLoading}: MessageBubbleProps) {
+  const isUser = message.role === "user";
+
   return (
     <div
       className={cn(
         "flex gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300",
-        message.role === "user" ? "flex-row-reverse" : "flex-row",
+        isUser ? "flex-row-reverse" : "flex-row",
       )}
     >
-      {message.role === "assistant" && (
-        <div className="shrink-0">
-          <Avatar className="size-8 border border-border shadow-sm bg-primary">
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              <Sparkles className="size-4" />
-            </AvatarFallback>
-          </Avatar>
+      {!isUser && (
+        <div className="shrink-0 mt-1">
+          <div className="size-6 flex items-center justify-center text-[#d97757]">
+            <Sparkles className="size-5 fill-current" />
+          </div>
         </div>
       )}
       
       <div
         className={cn(
-          "flex flex-col gap-2 max-w-[85%]",
-          message.role === "user" ? "items-end ml-auto" : "items-start",
+          "flex flex-col gap-2",
+          isUser ? "items-end ml-auto max-w-[70%]" : "items-start max-w-none flex-1",
         )}
       >
         {message.attachments && message.attachments.length > 0 && (
@@ -53,23 +53,20 @@ export function MessageBubble({message, isLoading}: MessageBubbleProps) {
         <div
           className={cn(
             "text-[15px] leading-relaxed whitespace-pre-wrap",
-            message.role === "user"
-              ? "bg-[#f3f1ec] dark:bg-[#2a2824] text-foreground px-5 py-3 rounded-2xl border border-black/[0.03]"
-              : "text-foreground font-serif text-[17px] tracking-tight",
+            isUser
+              ? "bg-[#f3f1ec] dark:bg-[#2a2824] text-foreground px-5 py-3 rounded-[24px] border border-black/[0.03]"
+              : "text-foreground font-sans text-[16px] tracking-normal",
           )}
         >
-          {message.role === "assistant" &&
+          {!isUser &&
           message.content === "" &&
           isLoading ? (
             <div className="flex items-center gap-2 py-1">
               <div className="flex gap-1">
-                <span className="size-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:-0.3s]"></span>
-                <span className="size-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:-0.15s]"></span>
-                <span className="size-1.5 rounded-full bg-primary/40 animate-bounce"></span>
+                <span className="size-1.5 rounded-full bg-[#d97757]/40 animate-bounce [animation-delay:-0.3s]"></span>
+                <span className="size-1.5 rounded-full bg-[#d97757]/40 animate-bounce [animation-delay:-0.15s]"></span>
+                <span className="size-1.5 rounded-full bg-[#d97757]/40 animate-bounce"></span>
               </div>
-              <span className="text-sm italic text-muted-foreground animate-pulse">
-                Claude is thinking...
-              </span>
             </div>
           ) : (
             <MessageContent content={message.content} role={message.role} />

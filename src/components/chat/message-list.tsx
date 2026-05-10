@@ -57,7 +57,7 @@ export function MessageList({ messages, isLoading, messagesEndRef }: MessageList
           variant="outline"
           size="icon"
           onClick={scrollToBottom}
-          className="fixed bottom-32 right-8 md:right-auto md:left-[calc(50%+380px)] -translate-x-1/2 size-10 rounded-full bg-background/80 backdrop-blur-sm border-border shadow-md z-20 flex items-center justify-center hover:bg-background transition-all animate-in fade-in zoom-in"
+          className="fixed bottom-28 md:bottom-32 left-1/2 -translate-x-1/2 size-10 rounded-full bg-background/80 backdrop-blur-sm border-border shadow-md z-20 flex items-center justify-center hover:bg-background transition-all animate-in fade-in zoom-in"
         >
           <ChevronDown className="size-5" />
         </Button>

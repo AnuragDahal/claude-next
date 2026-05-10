@@ -21,7 +21,7 @@ export function MessageContent({ content, role = "assistant" }: MessageContentPr
   }
 
   return (
-    <div className="prose prose-stone dark:prose-invert max-w-none break-words prose-p:leading-relaxed prose-p:my-1 prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-1 prose-li:my-0 prose-pre:p-0 prose-pre:bg-transparent first:prose-p:mt-0 last:prose-p:mb-0">
+    <div className="prose prose-stone dark:prose-invert max-w-none break-words prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent first:prose-p:mt-0 last:prose-p:mb-0">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
@@ -29,14 +29,23 @@ export function MessageContent({ content, role = "assistant" }: MessageContentPr
           a: ({ node, ...props }) => (
             <a
               {...props}
-              className="text-primary underline underline-offset-4 hover:opacity-80 transition-opacity"
+              className="text-[#d97757] underline underline-offset-4 hover:opacity-80 transition-opacity"
               target="_blank"
               rel="noopener noreferrer"
             />
           ),
           p: ({ node, ...props }) => <p className="mb-4 last:mb-0" {...props} />,
+          h1: ({ node, ...props }) => <h1 className="text-2xl font-semibold mb-2 mt-6" {...props} />,
+          h2: ({ node, ...props }) => <h2 className="text-xl font-semibold mb-2 mt-5" {...props} />,
+          h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mb-2 mt-4" {...props} />,
+          ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 gap-2 flex flex-col" {...props} />,
+          ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 gap-2 flex flex-col" {...props} />,
+          li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+          blockquote: ({ node, ...props }) => (
+            <blockquote className="border-l-4 border-[#d97757]/30 pl-4 py-1 my-4 italic text-muted-foreground" {...props} />
+          ),
           table: ({ node, ...props }) => (
-            <div className="overflow-x-auto mb-4 border border-border rounded-xl">
+            <div className="overflow-x-auto mb-6 border border-border rounded-xl">
               <table className="w-full border-collapse" {...props} />
             </div>
           ),
@@ -52,13 +61,12 @@ export function MessageContent({ content, role = "assistant" }: MessageContentPr
           ),
           code: ({ node, inline, className, children, ...props }: any) => {
             const match = /language-(\w+)/.exec(className || "");
-            const isCodeBlock = !inline && match;
+            const isCodeBlock = !inline;
 
             if (isCodeBlock) {
-              // Extract raw text for copying
-              const rawCode = String(node.children[0]?.value || children).replace(/\n$/, "");
+              const rawCode = String(children).replace(/\n$/, "");
               return (
-                <CodeBlock language={match[1]} value={rawCode}>
+                <CodeBlock language={match ? match[1] : "text"} value={rawCode}>
                   {children}
                 </CodeBlock>
               );
@@ -66,7 +74,7 @@ export function MessageContent({ content, role = "assistant" }: MessageContentPr
 
             return (
               <code
-                className="bg-muted/80 px-1.5 py-0.5 rounded-md text-sm font-mono text-foreground border border-border/50"
+                className="bg-[#f3f1ec] dark:bg-[#2a2824] px-1.5 py-0.5 rounded-md text-[0.9em] font-mono text-foreground border border-black/[0.05]"
                 {...props}
               >
                 {children}
@@ -97,21 +105,21 @@ function CodeBlock({ language, value, children }: CodeBlockProps) {
   };
 
   return (
-    <div className="relative my-6 rounded-2xl overflow-hidden bg-[#0d1117] border border-white/10 group shadow-2xl">
-      <div className="flex items-center justify-between px-5 py-2.5 bg-white/5 border-b border-white/10">
-        <span className="text-xs font-mono text-zinc-400 font-medium uppercase tracking-wider">
+    <div className="relative my-6 rounded-xl overflow-hidden bg-[#1e1e1e] border border-white/5 group">
+      <div className="flex items-center justify-between px-4 py-2 bg-white/[0.03] border-b border-white/[0.05]">
+        <span className="text-xs font-mono text-zinc-500 font-medium lowercase">
           {language}
         </span>
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={onCopy}
-          className="size-8 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-white/10 transition-all"
+          className="h-7 px-2 rounded text-zinc-500 hover:text-zinc-200 hover:bg-white/5 text-[11px] font-medium transition-all"
         >
-          {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+          {copied ? "Copied!" : "Copy"}
         </Button>
       </div>
-      <pre className="p-5 overflow-x-auto text-[13px] leading-relaxed text-zinc-100 scrollbar-thin scrollbar-thumb-white/10">
+      <pre className="p-4 overflow-x-auto text-[13px] leading-relaxed text-zinc-200 scrollbar-none">
         <code className={`language-${language} font-mono`}>{children}</code>
       </pre>
     </div>

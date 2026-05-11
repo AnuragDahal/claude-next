@@ -24,7 +24,6 @@ export function ChatInterface() {
   const messagesEndRef = useScroll(messages);
   const greeting = getGreeting();
   const isHome = messages.length === 0;
-
   return (
     <div className="flex flex-col h-screen w-full bg-background transition-colors duration-500 overflow-hidden">
       {/* Header */}

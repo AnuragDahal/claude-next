@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/context/auth-context";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export default function RootLayout({
   children,

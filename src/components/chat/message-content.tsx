@@ -1,21 +1,20 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-import { Check, Copy } from "lucide-react";
-import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
-
-// Note: Highlight.js styles are imported in globals.css for dynamic switching
+import remarkGfm from "remark-gfm";
 
 interface MessageContentProps {
   content: string;
   role?: "user" | "assistant";
 }
 
-export function MessageContent({ content, role = "assistant" }: MessageContentProps) {
+export function MessageContent({
+  content,
+  role = "assistant",
+}: MessageContentProps) {
   if (role === "user") {
     return <div className="whitespace-pre-wrap">{content}</div>;
   }
@@ -34,24 +33,52 @@ export function MessageContent({ content, role = "assistant" }: MessageContentPr
               rel="noopener noreferrer"
             />
           ),
-          p: ({ node, ...props }) => <p className="mb-4 last:mb-0" {...props} />,
-          h1: ({ node, ...props }) => <h1 className="text-2xl font-semibold mb-2 mt-6" {...props} />,
-          h2: ({ node, ...props }) => <h2 className="text-xl font-semibold mb-2 mt-5" {...props} />,
-          h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mb-2 mt-4" {...props} />,
-          ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 gap-2 flex flex-col" {...props} />,
-          ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 gap-2 flex flex-col" {...props} />,
+          // Changed p to div to avoid "div cannot be a descendant of p" hydration error
+          // when code blocks (which are divs) are rendered.
+          p: ({ node, ...props }) => (
+            <div className="mb-4 last:mb-0" {...props} />
+          ),
+          h1: ({ node, ...props }) => (
+            <h1 className="text-2xl font-semibold mb-2 mt-6" {...props} />
+          ),
+          h2: ({ node, ...props }) => (
+            <h2 className="text-xl font-semibold mb-2 mt-5" {...props} />
+          ),
+          h3: ({ node, ...props }) => (
+            <h3 className="text-lg font-semibold mb-2 mt-4" {...props} />
+          ),
+          ul: ({ node, ...props }) => (
+            <ul
+              className="list-disc pl-6 mb-4 gap-2 flex flex-col"
+              {...props}
+            />
+          ),
+          ol: ({ node, ...props }) => (
+            <ol
+              className="list-decimal pl-6 mb-4 gap-2 flex flex-col"
+              {...props}
+            />
+          ),
           li: ({ node, ...props }) => <li className="pl-1" {...props} />,
           blockquote: ({ node, ...props }) => (
-            <blockquote className="border-l-4 border-[#d97757]/30 pl-4 py-1 my-4 italic text-muted-foreground" {...props} />
+            <blockquote
+              className="border-l-4 border-[#d97757]/30 pl-4 py-1 my-4 italic text-muted-foreground"
+              {...props}
+            />
           ),
           table: ({ node, ...props }) => (
             <div className="overflow-x-auto mb-6 border border-border rounded-xl">
               <table className="w-full border-collapse" {...props} />
             </div>
           ),
-          thead: ({ node, ...props }) => <thead className="bg-muted/50" {...props} />,
+          thead: ({ node, ...props }) => (
+            <thead className="bg-muted/50" {...props} />
+          ),
           th: ({ node, ...props }) => (
-            <th className="px-4 py-2 border border-border font-semibold text-left" {...props} />
+            <th
+              className="px-4 py-2 border border-border font-semibold text-left"
+              {...props}
+            />
           ),
           td: ({ node, ...props }) => (
             <td className="px-4 py-2 border border-border" {...props} />
@@ -64,7 +91,16 @@ export function MessageContent({ content, role = "assistant" }: MessageContentPr
             const isCodeBlock = !inline;
 
             if (isCodeBlock) {
-              const rawCode = String(children).replace(/\n$/, "");
+              // Extract text content safely even if children is a tree (from rehype-highlight)
+              const getRawCode = (nodes: any): string => {
+                if (typeof nodes === "string") return nodes;
+                if (Array.isArray(nodes)) return nodes.map(getRawCode).join("");
+                if (nodes?.props?.children)
+                  return getRawCode(nodes.props.children);
+                return "";
+              };
+
+              const rawCode = getRawCode(children).replace(/\n$/, "");
               return (
                 <CodeBlock language={match ? match[1] : "text"} value={rawCode}>
                   {children}

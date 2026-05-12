@@ -39,8 +39,20 @@ export function MessageList({ messages, isLoading, messagesEndRef }: MessageList
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (containerRef.current && messages.length > 0) {
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+      const lastMessageIsUser = messages[messages.length - 1].role === "user";
+
+      // Auto-scroll if near bottom or if the user just sent a message
+      if (isNearBottom || lastMessageIsUser) {
+        // Use "auto" for streaming updates to make it feel more responsive
+        // and "smooth" for new user messages.
+        const behavior = lastMessageIsUser ? "smooth" : "auto";
+        messagesEndRef.current?.scrollIntoView({ behavior });
+      }
+    }
+  }, [messages, messagesEndRef]);
 
   return (
     <div className="flex-1 relative flex flex-col min-h-0 overflow-hidden">

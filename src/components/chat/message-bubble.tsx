@@ -53,10 +53,10 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
 
       <div
         className={cn(
-          "flex flex-col gap-1",
+          "flex flex-col gap-1 min-w-0 flex-1",
           isUser
             ? "items-end ml-auto max-w-[70%]"
-            : "items-start max-w-none flex-1"
+            : "items-start max-w-none"
         )}
       >
         {message.attachments && message.attachments.length > 0 && (
@@ -87,7 +87,7 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
         )}
         <div
           className={cn(
-            "text-[15px] leading-relaxed whitespace-pre-wrap",
+            "text-[15px] leading-relaxed whitespace-pre-wrap w-full overflow-hidden",
             isUser
               ? "bg-[#f3f1ec] dark:bg-[#2a2824] text-foreground px-5 py-3 rounded-[24px] border border-black/[0.03]"
               : "text-foreground font-sans text-[16px] tracking-normal"

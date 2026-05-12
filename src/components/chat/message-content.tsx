@@ -20,7 +20,7 @@ export function MessageContent({
   }
 
   return (
-    <div className="prose prose-stone dark:prose-invert max-w-none break-words prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent first:prose-p:mt-0 last:prose-p:mb-0">
+    <div className="prose prose-stone dark:prose-invert max-w-none break-words prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent first:prose-p:mt-0 last:prose-p:mb-0 min-w-0 w-full">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
@@ -86,6 +86,9 @@ export function MessageContent({
           tr: ({ node, ...props }) => (
             <tr className="even:bg-muted/30 transition-colors" {...props} />
           ),
+          strong: ({ node, ...props }) => (
+            <strong className="font-semibold text-foreground" {...props} />
+          ),
           code: ({ node, inline, className, children, ...props }: any) => {
             const match = /language-(\w+)/.exec(className || "");
             const isCodeBlock = !inline;
@@ -110,7 +113,7 @@ export function MessageContent({
 
             return (
               <code
-                className="bg-[#f3f1ec] dark:bg-[#2a2824] px-1.5 py-0.5 rounded-md text-[0.9em] font-mono text-foreground border border-black/[0.05]"
+                className="bg-muted px-1.5 py-0.5 rounded-md text-[0.85em] font-mono text-foreground font-medium"
                 {...props}
               >
                 {children}
@@ -141,7 +144,7 @@ function CodeBlock({ language, value, children }: CodeBlockProps) {
   };
 
   return (
-    <div className="relative my-6 rounded-xl overflow-hidden bg-[#1e1e1e] border border-white/5 group">
+    <div className="relative my-6 rounded-xl overflow-hidden bg-[#1e1e1e] border border-white/5 group max-w-full min-w-0">
       <div className="flex items-center justify-between px-4 py-2 bg-white/[0.03] border-b border-white/[0.05]">
         <span className="text-xs font-mono text-zinc-500 font-medium lowercase">
           {language}
@@ -155,8 +158,10 @@ function CodeBlock({ language, value, children }: CodeBlockProps) {
           {copied ? "Copied!" : "Copy"}
         </Button>
       </div>
-      <pre className="p-4 overflow-x-auto text-[13px] leading-relaxed text-zinc-200 scrollbar-none">
-        <code className={`language-${language} font-mono`}>{children}</code>
+      <pre className="p-4 overflow-x-auto text-[13px] leading-relaxed text-zinc-200 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+        <code className={`language-${language} font-mono whitespace-pre`}>
+          {children}
+        </code>
       </pre>
     </div>
   );

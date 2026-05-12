@@ -36,7 +36,7 @@ export function MessageContent({
           // Changed p to div to avoid "div cannot be a descendant of p" hydration error
           // when code blocks (which are divs) are rendered.
           p: ({ node, ...props }) => (
-            <div className="mb-4 last:mb-0" {...props} />
+            <div className="mb-2 last:mb-0" {...props} />
           ),
           h1: ({ node, ...props }) => (
             <h1 className="text-2xl font-semibold mb-2 mt-6" {...props} />
@@ -49,17 +49,17 @@ export function MessageContent({
           ),
           ul: ({ node, ...props }) => (
             <ul
-              className="list-disc pl-6 mb-4 gap-2 flex flex-col"
+              className="list-disc pl-6 mb-2 space-y-1"
               {...props}
             />
           ),
           ol: ({ node, ...props }) => (
             <ol
-              className="list-decimal pl-6 mb-4 gap-2 flex flex-col"
+              className="list-decimal pl-6 mb-2 space-y-1"
               {...props}
             />
           ),
-          li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+          li: ({ node, ...props }) => <li className="pl-1 leading-relaxed" {...props} />,
           blockquote: ({ node, ...props }) => (
             <blockquote
               className="border-l-4 border-[#d97757]/30 pl-4 py-1 my-4 italic text-muted-foreground"

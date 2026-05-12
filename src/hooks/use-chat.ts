@@ -70,6 +70,7 @@ export function useChat() {
       role: "user",
       content: input,
       attachments: messageAttachments.length > 0 ? messageAttachments : undefined,
+      timestamp: Date.now(),
     };
 
     addMessage(userMessage);
@@ -91,6 +92,7 @@ export function useChat() {
         id: assistantId,
         role: "assistant",
         content: "",
+        timestamp: Date.now(),
       };
 
       addMessage(assistantMessage);
@@ -111,7 +113,8 @@ export function useChat() {
       addMessage({
         id: errorId,
         role: "assistant",
-        content: "Sorry, I encountered an error. Please make sure your GEMINI_API_KEY is set in .env.local."
+        content: "Sorry, I encountered an error. Please make sure your GEMINI_API_KEY is set in .env.local.",
+        timestamp: Date.now(),
       });
     } finally {
       setIsLoading(false);

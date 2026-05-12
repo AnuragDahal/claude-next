@@ -3,6 +3,7 @@ export interface Message {
   role: "user" | "assistant";
   content: string;
   attachments?: { preview: string; type: string; name: string }[];
+  timestamp?: number;
 }
 
 export interface ChatSession {

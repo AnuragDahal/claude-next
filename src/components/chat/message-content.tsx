@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
@@ -15,12 +15,27 @@ export function MessageContent({
   content,
   role = "assistant",
 }: MessageContentProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   if (role === "user") {
     return <div className="whitespace-pre-wrap">{content}</div>;
   }
 
+  if (!mounted) {
+    return <div className="min-h-[20px]" />;
+  }
+
+  // Pre-process content to fix common markdown formatting issues from LLMs
+  const processedContent = content
+    .replace(/^\s*\d+\.\s*/gm, "- ") // Convert numbering "1. " to bullets "- "
+    .replace(/\n{3,}/g, "\n\n"); // Normalize excessive newlines
+
   return (
-    <div className="prose prose-stone dark:prose-invert max-w-none break-words prose-p:leading-relaxed prose-pre:p-0 prose-pre:bg-transparent first:prose-p:mt-0 last:prose-p:mb-0 min-w-0 w-full">
+    <div className="prose prose-stone dark:prose-invert max-w-none break-words prose-p:leading-normal prose-pre:p-0 prose-pre:bg-transparent first:prose-p:mt-0 last:prose-p:mb-0 min-w-0 w-full prose-headings:mt-6 prose-headings:mb-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
@@ -34,9 +49,8 @@ export function MessageContent({
             />
           ),
           // Changed p to div to avoid "div cannot be a descendant of p" hydration error
-          // when code blocks (which are divs) are rendered.
           p: ({ node, ...props }) => (
-            <div className="mb-2 last:mb-0" {...props} />
+            <div className="mb-3 last:mb-0 leading-normal" {...props} />
           ),
           h1: ({ node, ...props }) => (
             <h1 className="text-2xl font-semibold mb-2 mt-6" {...props} />
@@ -49,17 +63,19 @@ export function MessageContent({
           ),
           ul: ({ node, ...props }) => (
             <ul
-              className="list-disc pl-6 mb-2 space-y-1"
+              className="list-none pl-0 mb-3 space-y-1"
               {...props}
             />
           ),
           ol: ({ node, ...props }) => (
-            <ol
-              className="list-decimal pl-6 mb-2 space-y-1"
+            <ul
+              className="list-none pl-0 mb-3 space-y-1"
               {...props}
             />
           ),
-          li: ({ node, ...props }) => <li className="pl-1 leading-relaxed" {...props} />,
+          li: ({ node, ...props }) => (
+            <li className="pl-0 leading-normal mb-1.5 last:mb-0 [&>*]:inline [&>*]:m-0" {...props} />
+          ),
           blockquote: ({ node, ...props }) => (
             <blockquote
               className="border-l-4 border-[#d97757]/30 pl-4 py-1 my-4 italic text-muted-foreground"
@@ -122,7 +138,7 @@ export function MessageContent({
           },
         }}
       >
-        {content}
+        {processedContent}
       </ReactMarkdown>
     </div>
   );

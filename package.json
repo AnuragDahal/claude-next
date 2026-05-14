@@ -1,6 +1,7 @@
 {
   "name": "claude-code",
   "version": "0.1.0",
+  "description": "A premium AI chat interface template and starter project built with Next.js and Tailwind CSS.",
   "private": true,
   "scripts": {
     "dev": "next dev",

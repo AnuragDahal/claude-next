@@ -1,6 +1,6 @@
-# Claude Code UI
+# Claude Code UI - AI Chat Interface Starter
 
-A premium, minimalist AI chat interface inspired by Claude.ai, built with Next.js, Tailwind CSS 4, and Shadcn UI.
+A premium, minimalist AI chat interface template and starter project inspired by Claude.ai, built with Next.js, Tailwind CSS 4, and Shadcn UI.
 
 ## Features
 

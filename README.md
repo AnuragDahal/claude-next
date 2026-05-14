@@ -1,93 +1,62 @@
-# Claude.ai UI Template & Starter Kit
- 
-![Claude UI Mockup](/public/assets/hero-mockup.png)
- 
-A premium, high-fidelity UI template and starter kit inspired by the Claude.ai interface. Built with modern web technologies, this project provides a production-ready foundation for developers looking to build sophisticated AI chat applications with a focus on minimalist design and enterprise-grade aesthetics.
- 
-> [!TIP]
-> **Why use this starter?** Skip the weeks of UI/UX development and start directly with a refined, responsive, and feature-rich interface that feels premium out of the box.
- 
-## ✨ Key Features
- 
--   **Authentic Claude Experience**: Mirroring the minimalist, stone-toned aesthetic of Claude.ai.
--   **Intelligent Chat Interface**: Modular chat components including message bubbles, input bars, and message lists.
--   **Responsive Sidebar**: A fully collapsible and interactive sidebar with tooltips and quick navigation.
--   **Rich Markdown Support**: Seamless rendering of Markdown content with syntax highlighting for code blocks.
--   **Authentication Ready**: Integrated with NextAuth.js (v5 beta) for secure Google OAuth sessions.
--   **Command Palette**: Quick navigation and actions using `Ctrl + K`.
--   **Modern Design System**: Built using Tailwind CSS 4 and shadcn/ui for maximum flexibility and performance.
--   **Micro-Animations**: Staggered animations and smooth transitions for a premium feel.
- 
-## 🛠️ Tech Stack
- 
--   **Framework**: [Next.js 15+](https://nextjs.org) (App Router)
--   **Styling**: [Tailwind CSS 4](https://tailwindcss.com)
--   **Components**: [shadcn/ui](https://ui.shadcn.com)
--   **Icons**: [Lucide React](https://lucide.dev)
--   **Authentication**: [NextAuth.js v5](https://authjs.dev)
--   **Animations**: [Framer Motion](https://www.framer.com/motion/) & Tailwind Animate
--   **Markdown**: `react-markdown`, `rehype-highlight`, `remark-gfm`
- 
-## 🚀 Getting Started
- 
-### Prerequisites
- 
--   Node.js 18+ 
--   pnpm / npm / yarn
- 
-### Installation
- 
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/your-username/claude-code.git
-    cd claude-code
-    ```
- 
-2. Install dependencies:
-    ```bash
-    pnpm install
-    ```
- 
-3. Set up environment variables:
-    Create a `.env.local` file in the root directory:
-    ```env
-    AUTH_SECRET="your-secret"
-    AUTH_GOOGLE_ID="your-google-id"
-    AUTH_GOOGLE_SECRET="your-google-secret"
-    ```
- 
-4. Run the development server:
-    ```bash
-    pnpm dev
-    ```
- 
-Open [http://localhost:3000](http://localhost:3000) to see the application.
- 
-## 🎨 Customization & Extension
- 
-This starter kit is designed to be highly extensible:
- 
--   **Theme Colors**: Modify the primary and stone-toned palettes in `src/app/globals.css`.
--   **AI Integration**: Hook up your LLM (OpenAI, Anthropic, Gemini) in the `src/hooks/use-chat.ts` or via a dedicated API route in `src/app/api/chat/`.
--   **Auth Providers**: Easily add more providers (GitHub, Discord, Credentials) in `src/lib/auth.ts`.
--   **Components**: Leverage the pre-built `shadcn/ui` components located in `src/components/ui/` to build new pages quickly.
- 
-## 🏗️ Project Structure
- 
-```text
-src/
-├── app/             # App router pages and API routes
-├── components/      # Reusable UI and Chat-specific components
-├── context/         # React Context providers (Auth, Chat)
-├── hooks/           # Custom hooks for logic extraction
-├── lib/             # Utility functions and shared libraries
-└── types/           # TypeScript definitions
-```
- 
-## 📜 License
- 
-This project is for educational purposes only. All branding and design rights belong to Anthropic.
- 
----
- 
-Created with ❤️ by [Anurag](https://github.com/AnuragDahal)
+# Claude Code UI
+
+A premium, minimalist AI chat interface inspired by Claude.ai, built with Next.js, Tailwind CSS 4, and Shadcn UI.
+
+## Features
+
+- **Minimalist Design**: Clean, typography-focused interface with a "parchment" aesthetic.
+- **Smart Conversations**: Supports streaming responses, markdown rendering, and code syntax highlighting.
+- **File Attachments**: Capability to upload and preview images and documents.
+- **Authentication**: Integrated Google OAuth via Next-Auth (v5).
+- **Dark Mode**: Fully supported with semantic color variables.
+- **Responsive Layout**: Works seamlessly on mobile and desktop with a collapsible sidebar.
+
+## Project Structure
+
+- `src/app`: Next.js App Router pages and global styles.
+- `src/components/chat`: Core chat components (`ChatInterface`, `MessageList`, `InputBar`).
+- `src/components/ui`: Reusable UI components from Shadcn UI.
+- `src/hooks`: Custom React hooks for chat logic and scroll management.
+- `src/context`: Authentication and global providers.
+- `src/lib`: Utility functions, types, and API clients.
+
+## Design System
+
+The project uses a variable-based design system in `src/app/globals.css`. 
+
+- **Primary Colors**: Use `--primary` (Claude Orange) for accents.
+- **Semantic Tokens**: Custom tokens for code blocks (`--code-bg`), scrollbars (`--scrollbar-thumb`), and sidebars.
+- **Tailwind 4**: Leverages the latest Tailwind features for styling.
+
+## Integration Guide
+
+### 1. Backend API
+The chat interface expects an API route at `/api/chat`. You can replace the current mock/Google integration in `src/app/api/chat/route.ts` with your preferred LLM provider.
+
+### 2. State Management
+The chat state is managed by `useChat` hook which interfaces with the backend. For complex state, consider extending the `zustand` store in `src/store`.
+
+### 3. Styling
+To change the theme, update the CSS variables in `:root` and `.dark` blocks in `src/app/globals.css`. All components are mapped to these variables.
+
+## Getting Started
+
+1. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+2. Set up environment variables in `.env.local`:
+   ```env
+   GOOGLE_CLIENT_ID=...
+   GOOGLE_CLIENT_SECRET=...
+   NEXTAUTH_SECRET=...
+   NEXT_PUBLIC_GEMINI_API_KEY=...
+   ```
+
+3. Run the development server:
+   ```bash
+   pnpm dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.

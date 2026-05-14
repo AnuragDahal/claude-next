@@ -45,7 +45,7 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
     >
       {!isUser && (
         <div className="shrink-0 mt-1">
-          <div className="size-6 flex items-center justify-center text-[#d97757]">
+          <div className="size-6 flex items-center justify-center text-primary">
             <Sparkles className="size-5 fill-current" />
           </div>
         </div>
@@ -89,16 +89,16 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
           className={cn(
             "text-[15px] leading-relaxed whitespace-pre-wrap w-full overflow-hidden",
             isUser
-              ? "bg-[#f3f1ec] dark:bg-[#2a2824] text-foreground px-5 py-3 rounded-[24px] border border-black/[0.03]"
+              ? "bg-secondary text-foreground px-5 py-3 rounded-[24px] border border-black/[0.03]"
               : "text-foreground font-sans text-[16px] tracking-normal"
           )}
         >
           {!isUser && message.content === "" && isLoading ? (
             <div className="flex items-center gap-2 py-1">
               <div className="flex gap-1">
-                <span className="size-1.5 rounded-full bg-[#d97757]/40 animate-bounce [animation-delay:-0.3s]"></span>
-                <span className="size-1.5 rounded-full bg-[#d97757]/40 animate-bounce [animation-delay:-0.15s]"></span>
-                <span className="size-1.5 rounded-full bg-[#d97757]/40 animate-bounce"></span>
+                <span className="size-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:-0.3s]"></span>
+                <span className="size-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:-0.15s]"></span>
+                <span className="size-1.5 rounded-full bg-primary/40 animate-bounce"></span>
               </div>
             </div>
           ) : (
@@ -110,7 +110,7 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
         {!isLoading && (
           <div
             className={cn(
-              "flex items-center gap-3 mt-1 text-[#6b6359] dark:text-[#a09a90] text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+              "flex items-center gap-3 mt-1 text-muted-foreground text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200",
               isUser ? "flex-row-reverse mr-2" : "ml-0"
             )}
           >

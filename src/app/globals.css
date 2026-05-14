@@ -53,6 +53,16 @@
   --color-claude-sidebar: #f3f2ef;
   --color-claude-orange: #d97757;
   --color-claude-accent: #e5e5e2;
+
+  /* Semantic UI Tokens */
+  --code-bg: #1e1e1e;
+  --code-header-bg: rgba(255, 255, 255, 0.03);
+  --code-border: rgba(255, 255, 255, 0.05);
+  --code-text: #e4e4e7;
+  --code-muted: #71717a;
+  
+  --scrollbar-thumb: rgba(0, 0, 0, 0.1);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.2);
 }
 
 :root {
@@ -89,6 +99,9 @@
   --sidebar-border: #e8e6e1;
   --sidebar-ring: #d97757;
   --sidebar-width: 336px;
+  
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
 }
 
 .dark {
@@ -123,6 +136,13 @@
   --sidebar-accent-foreground: #f5f0e8;
   --sidebar-border: #3a3834;
   --sidebar-ring: #d97757;
+
+  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.2);
+  
+  --code-bg: #1e1e1e;
+  --code-header-bg: rgba(255, 255, 255, 0.03);
+  --code-border: rgba(255, 255, 255, 0.05);
 }
 
 @layer base {
@@ -157,13 +177,13 @@
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
+    background: var(--scrollbar-thumb);
     border-radius: 10px;
     border: 1px solid transparent;
     background-clip: content-box;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
+    background: var(--scrollbar-thumb-hover);
     background-clip: content-box;
   }
   .scrollbar-thin::-webkit-scrollbar {
@@ -174,10 +194,10 @@
     background: transparent;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--scrollbar-thumb);
     border-radius: 10px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--scrollbar-thumb-hover);
   }
 }

@@ -43,7 +43,7 @@ export function MessageContent({
           a: ({ node, ...props }) => (
             <a
               {...props}
-              className="text-[#d97757] underline underline-offset-4 hover:opacity-80 transition-opacity"
+              className="text-primary underline underline-offset-4 hover:opacity-80 transition-opacity"
               target="_blank"
               rel="noopener noreferrer"
             />
@@ -78,7 +78,7 @@ export function MessageContent({
           ),
           blockquote: ({ node, ...props }) => (
             <blockquote
-              className="border-l-4 border-[#d97757]/30 pl-4 py-1 my-4 italic text-muted-foreground"
+              className="border-l-4 border-primary/30 pl-4 py-1 my-4 italic text-muted-foreground"
               {...props}
             />
           ),
@@ -160,8 +160,8 @@ function CodeBlock({ language, value, children }: CodeBlockProps) {
   };
 
   return (
-    <div className="relative my-6 rounded-xl overflow-hidden bg-[#1e1e1e] border border-white/5 group max-w-full min-w-0">
-      <div className="flex items-center justify-between px-4 py-2 bg-white/[0.03] border-b border-white/[0.05]">
+    <div className="relative my-6 rounded-xl overflow-hidden bg-[var(--code-bg)] border border-[var(--code-border)] group max-w-full min-w-0">
+      <div className="flex items-center justify-between px-4 py-2 bg-[var(--code-header-bg)] border-b border-[var(--code-border)]">
         <span className="text-xs font-mono text-zinc-500 font-medium lowercase">
           {language}
         </span>
@@ -169,7 +169,7 @@ function CodeBlock({ language, value, children }: CodeBlockProps) {
           variant="ghost"
           size="sm"
           onClick={onCopy}
-          className="h-7 px-2 rounded text-zinc-500 hover:text-zinc-200 hover:bg-white/5 text-[11px] font-medium transition-all"
+          className="h-7 px-2 rounded text-zinc-500 hover:text-zinc-200 hover:bg-[var(--code-header-bg)] text-[11px] font-medium transition-all"
         >
           {copied ? "Copied!" : "Copy"}
         </Button>

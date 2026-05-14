@@ -5,30 +5,30 @@ import { Sparkles, ShieldCheck, Zap } from "lucide-react";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen w-full bg-[#f5f0e8] font-sans">
+    <div className="flex min-h-screen w-full bg-secondary font-sans">
       {/* Left Side: Login Card (Minimal Space) */}
-      <div className="flex w-full flex-col items-center justify-center border-r border-[#e5e1da] bg-[#f5f0e8] p-6 sm:p-12 lg:w-[350px]">
+      <div className="flex w-full flex-col items-center justify-center border-r border-border bg-secondary p-6 sm:p-12 lg:w-[350px]">
         <div className="w-full max-w-[320px] flex flex-col items-center text-center">
           {/* Logo */}
           <div className="mb-12 flex items-center gap-2">
             <div className="rounded-lg bg-white p-2 shadow-sm">
-              <Sparkles className="h-6 w-6 text-[#d97706]" />
+              <Sparkles className="h-6 w-6 text-primary" />
             </div>
-            <span className="font-serif text-2xl font-semibold tracking-tight text-[#1a1a1a]">
+            <span className="font-serif text-2xl font-semibold tracking-tight text-foreground">
               Claude
             </span>
           </div>
 
-          <h1 className="mb-2 font-serif text-3xl font-semibold tracking-tight text-[#1a1a1a] sm:text-4xl">
+          <h1 className="mb-2 font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             Welcome
           </h1>
-          <p className="mb-10 text-[15px] text-[#6b6b6b]">
+          <p className="mb-10 text-[15px] text-muted-foreground">
             Sign in to continue to Claude
           </p>
 
           <button
             onClick={() => signIn("google")}
-            className="group flex w-full items-center justify-center gap-3 rounded-xl border border-[#e5e1da] bg-white py-3.5 text-[15px] font-medium text-[#1a1a1a] transition-all hover:bg-[#fafaf9] hover:shadow-lg active:scale-[0.98]"
+            className="group flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-white py-3.5 text-[15px] font-medium text-foreground transition-all hover:bg-secondary/50 hover:shadow-lg active:scale-[0.98]"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path
@@ -51,13 +51,13 @@ export default function LoginPage() {
             Continue with Google
           </button>
 
-          <p className="mt-12 text-[11px] leading-relaxed text-[#8a8a8a]">
+          <p className="mt-12 text-[11px] leading-relaxed text-muted-foreground/80">
             By continuing, you agree to our{" "}
-            <button className="underline decoration-[#d1d5db] transition-colors hover:text-[#1a1a1a]">
+            <button className="underline decoration-border transition-colors hover:text-foreground">
               Terms
             </button>{" "}
             and{" "}
-            <button className="underline decoration-[#d1d5db] transition-colors hover:text-[#1a1a1a]">
+            <button className="underline decoration-border transition-colors hover:text-foreground">
               Privacy Policy
             </button>
             .
@@ -66,13 +66,13 @@ export default function LoginPage() {
       </div>
 
       {/* Right Side: Branding (Desktop Only) */}
-      <div className="relative hidden flex-1 flex-col items-center justify-center bg-[#fcfaf7] p-12 lg:flex">
+      <div className="relative hidden flex-1 flex-col items-center justify-center bg-background p-12 lg:flex">
         <div className="max-w-2xl space-y-8">
-          <h2 className="font-serif text-6xl font-medium leading-[1.05] tracking-tight text-[#1a1a1a]">
+          <h2 className="font-serif text-6xl font-medium leading-[1.05] tracking-tight text-foreground">
             The AI partner <br />
-            for <span className="italic text-[#d97706]">thoughtful</span> work.
+            for <span className="italic text-primary">thoughtful</span> work.
           </h2>
-          <p className="text-xl leading-relaxed text-[#6b6b6b]">
+          <p className="text-xl leading-relaxed text-muted-foreground">
             Experience a new standard of AI that's helpful, harmless, and honest.
           </p>
 
@@ -90,14 +90,14 @@ export default function LoginPage() {
               },
             ].map((item, i) => (
               <div key={i} className="flex max-w-[240px] flex-col gap-3">
-                <div className="w-fit rounded-full bg-[#f5f0e8] p-2">
-                  <item.icon className="h-5 w-5 text-[#d97706]" />
+                <div className="w-fit rounded-full bg-secondary p-2">
+                  <item.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-medium text-[#1a1a1a]">
+                  <h4 className="text-lg font-medium text-foreground">
                     {item.title}
                   </h4>
-                  <p className="text-sm text-[#8a8a8a]">{item.desc}</p>
+                  <p className="text-sm text-muted-foreground/80">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -105,11 +105,11 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <div className="absolute bottom-8 left-12 right-12 flex justify-between text-xs text-[#8a8a8a]">
+        <div className="absolute bottom-8 left-12 right-12 flex justify-between text-xs text-muted-foreground/80">
           <span>© 2026 Anthropic PBC. All rights reserved.</span>
           <div className="flex gap-4">
-            <button className="hover:text-[#1a1a1a]">Status</button>
-            <button className="hover:text-[#1a1a1a]">Support</button>
+            <button className="hover:text-foreground">Status</button>
+            <button className="hover:text-foreground">Support</button>
           </div>
         </div>
       </div>

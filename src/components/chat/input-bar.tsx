@@ -4,6 +4,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import React, { useRef, useEffect } from "react";
 import { type Attachment } from "@/hooks/use-chat";
+import { useChatStore } from "@/store/chat-store";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Check } from "lucide-react";
+
 
 interface InputBarProps {
   input: string;
@@ -28,6 +37,15 @@ export function InputBar({
 }: InputBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { selectedModel, setSelectedModel } = useChatStore();
+
+  const models = [
+    "Sonnet 4.5",
+    "Haiku 4.5",
+    "Opus 5.6",
+  ];
+
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -94,7 +112,7 @@ export function InputBar({
           onChange={handleInput}
           placeholder="How can I help you today?"
           className={cn(
-            "w-full min-h-[44px] max-h-[240px] overflow-y-auto bg-transparent border-none focus-visible:ring-0 resize-none py-3 px-6 text-base placeholder:text-muted-foreground/40 placeholder:animate-in placeholder:fade-in placeholder:duration-1000 leading-relaxed shadow-none",
+            "w-full min-h-[44px] max-h-[240px] overflow-y-auto bg-transparent dark:bg-transparent border-none focus-visible:ring-0 resize-none py-3 px-6 text-base placeholder:text-muted-foreground/40 placeholder:animate-in placeholder:fade-in placeholder:duration-1000 leading-relaxed shadow-none",
             isHome && "min-h-[100px] text-lg py-5"
           )}
           onKeyDown={(e) => {
@@ -118,18 +136,36 @@ export function InputBar({
             </Button>
           </div>
           <div className="flex items-center gap-2">
-            {!isHome && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 gap-1.5 rounded-xl px-3 text-muted-foreground hover:text-foreground hover:bg-muted"
-              >
-                <span className="text-xs font-medium">Sonnet 3.5</span>
-                <ChevronDown className="size-3.5" />
-              </Button>
-            )}
-            {isHome && <div className="text-xs text-muted-foreground/60 mr-2">Claude 3.5 Sonnet</div>}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-1.5 rounded-xl px-3 text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
+                >
+                  <span className="text-xs font-medium">
+                    {selectedModel}
+                  </span>
+
+                  <ChevronDown className="size-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px] rounded-xl p-1 shadow-2xl">
+                {models.map((model) => (
+                  <DropdownMenuItem
+                    key={model}
+                    className="gap-2 py-2 rounded-lg cursor-pointer"
+                    onClick={() => setSelectedModel(model)}
+                  >
+                    <span className="flex-1 text-sm">{model}</span>
+                    {selectedModel === model && <Check className="size-4 text-primary" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <div className="h-4 w-px bg-border/20 mx-1" />
+
             <Button
               onClick={handleSend}
               disabled={!canSend && !isLoading}

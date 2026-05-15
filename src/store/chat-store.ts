@@ -11,7 +11,10 @@ interface ChatState {
   addMessage: (message: Message) => void
   updateMessage: (id: string, content: string) => void  // for streaming
   updateSessionTitle: (id: string, title: string) => void
+  selectedModel: string
+  setSelectedModel: (model: string) => void
   getActiveSession: () => ChatSession | null
+
 }
 
 export const useChatStore = create<ChatState>()(
@@ -19,6 +22,13 @@ export const useChatStore = create<ChatState>()(
     (set, get) => ({
       sessions: [],
       activeSessionId: null,
+      selectedModel: "Sonnet 4.5",
+
+      setSelectedModel: (model) => {
+
+        set({ selectedModel: model })
+      },
+
 
       createSession: () => {
         const newSession: ChatSession = {

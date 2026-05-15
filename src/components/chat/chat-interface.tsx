@@ -1,13 +1,17 @@
 "use client";
 
-import { Sparkles, MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { getGreeting } from "@/lib/utils/greeting";
-import { useChat } from "@/hooks/use-chat";
-import { useScroll } from "@/hooks/use-scroll";
+
 import { InputBar } from "@/components/chat/input-bar";
 import { MessageList } from "@/components/chat/message-list";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/auth-context";
+import { useChat } from "@/hooks/use-chat";
+import { useScroll } from "@/hooks/use-scroll";
+import { getGreeting } from "@/lib/utils/greeting";
 import { SidebarTrigger } from "../ui/sidebar";
+import { MoreHorizontal, Sparkles } from "lucide-react";
+
 
 export function ChatInterface() {
   const {
@@ -21,8 +25,31 @@ export function ChatInterface() {
     handleSend,
   } = useChat();
   const messagesEndRef = useScroll(messages);
+  const { user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+
+
+    return (
+      <div className="flex flex-col h-screen w-full bg-background transition-colors duration-500 overflow-hidden">
+        <header className="flex items-center justify-between md:justify-end px-4 py-3 bg-transparent sticky top-0 z-30 min-h-[56px]">
+          <SidebarTrigger className="md:hidden" />
+        </header>
+        <main className="flex-1 flex flex-col relative overflow-hidden" />
+      </div>
+    );
+  }
+
   const greeting = getGreeting();
   const isHome = messages.length === 0;
+  const userName = user?.name?.split(" ")[0] || "Anurag";
+
+
   return (
     <div className="flex flex-col h-screen w-full bg-background transition-colors duration-500 overflow-hidden">
       {/* Header */}
@@ -57,8 +84,9 @@ export function ChatInterface() {
                 <Sparkles className="size-8 text-white fill-current" />
               </div>
               <h1 className="text-4xl md:text-5xl font-serif font-medium tracking-tight text-center">
-                {greeting}, Anurag
+                {greeting}, {userName}
               </h1>
+
             </div>
             <InputBar
               input={input}

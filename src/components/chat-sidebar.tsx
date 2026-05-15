@@ -1,7 +1,9 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { signOut } from "next-auth/react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,51 +51,28 @@ import {
   Sun,
   X,
 } from "lucide-react";
-import React from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { SearchCommand } from "./search-command";
 import { useChatStore } from "@/store/chat-store";
-
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => setMounted(true), []);
-
-  if (!mounted) {
-    return <div className="size-8" />;
-  }
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        >
-          {theme === "dark" ? (
-            <Sun className="size-5" />
-          ) : (
-            <Moon className="size-5" />
-          )}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="right">
-        Switch to {theme === "dark" ? "light" : "dark"} mode
-      </TooltipContent>
-    </Tooltip>
-  );
-}
+import { useAuth } from "@/context/auth-context";
 
 export function ChatSidebar() {
-  const [searchOpen, setSearchOpen] = React.useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { state, toggleSidebar } = useSidebar();
-  const { sessions, activeSessionId, switchSession, deleteSession, createSession } =
-    useChatStore();
+  const {
+    sessions,
+    activeSessionId,
+    switchSession,
+    deleteSession,
+    createSession,
+  } = useChatStore();
+  const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setMounted(true);
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -103,6 +82,21 @@ export function ChatSidebar() {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
+
+  if (!mounted) {
+    return (
+      <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
+        <SidebarHeader
+          className={cn(
+            "pt-6 pb-0 flex flex-row items-center gap-4 px-2 justify-center",
+          )}
+        >
+          <div className="size-8 rounded-lg bg-sidebar-accent animate-pulse" />
+        </SidebarHeader>
+        <SidebarContent className="scrollbar-none pt-2" />
+      </Sidebar>
+    );
+  }
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
@@ -260,13 +254,18 @@ export function ChatSidebar() {
                       state === "expanded" ? "size-10" : "size-8",
                     )}
                   >
+                    {user?.image && (
+                      <AvatarImage src={user.image} alt={user.name || "User"} />
+                    )}
                     <AvatarFallback className="bg-foreground text-background font-bold text-base">
-                      A
+                      {user?.name?.[0] || "A"}
                     </AvatarFallback>
                   </Avatar>
                   {state === "expanded" && (
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold">Anurag</span>
+                      <span className="text-sm font-semibold truncate max-w-[120px]">
+                        {user?.name || "Anurag"}
+                      </span>
                       <span className="text-xs text-muted-foreground">
                         Free plan
                       </span>
@@ -274,21 +273,13 @@ export function ChatSidebar() {
                   )}
                 </div>
                 {state === "expanded" && (
-                  <div className="flex items-center gap-1">
-                    <ThemeToggle />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 rounded-lg text-muted-foreground"
-                    >
-                      <ChevronsUpDown className="size-4" />
-                    </Button>
-                  </div>
-                )}
-                {state === "collapsed" && (
-                  <div className="mt-2">
-                    <ThemeToggle />
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 rounded-lg text-muted-foreground"
+                  >
+                    <ChevronsUpDown className="size-4" />
+                  </Button>
                 )}
               </div>
             </DropdownMenuTrigger>
@@ -298,8 +289,9 @@ export function ChatSidebar() {
               className="w-[280px] rounded-2xl p-2 shadow-2xl"
             >
               <div className="px-3 py-2 text-xs font-medium text-muted-foreground truncate">
-                079bct010@ioepc.edu.np
+                {user?.email || "079bct010@ioepc.edu.np"}
               </div>
+
               <DropdownMenuSeparator />
               <DropdownMenuItem className="gap-3 py-2.5 rounded-xl">
                 <Settings className="size-4" />
@@ -313,8 +305,27 @@ export function ChatSidebar() {
                 <span className="flex-1 font-medium">Language</span>
                 <ChevronDown className="size-4 text-muted-foreground" />
               </DropdownMenuItem>
+              <DropdownMenuItem
+                className="gap-3 py-2.5 rounded-xl cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setTheme(theme === "dark" ? "light" : "dark");
+                }}
+              >
+                {theme === "dark" ? (
+                  <Sun className="size-4" />
+                ) : (
+                  <Moon className="size-4" />
+                )}
+                <span className="flex-1 font-medium">Appearance</span>
+                <span className="text-xs text-muted-foreground capitalize">
+                  {theme}
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem className="gap-3 py-2.5 rounded-xl">
                 <HelpCircle className="size-4" />
+
                 <span className="font-medium">Get help</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -332,7 +343,10 @@ export function ChatSidebar() {
                 <ChevronRight className="size-4 text-muted-foreground" />
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="gap-3 py-2.5 rounded-xl text-destructive focus:text-destructive">
+              <DropdownMenuItem
+                className="gap-3 py-2.5 rounded-xl text-destructive focus:text-destructive cursor-pointer"
+                onClick={() => signOut({ callbackUrl: "/login" })}
+              >
                 <LogOut className="size-4" />
                 <span className="font-medium">Log out</span>
               </DropdownMenuItem>

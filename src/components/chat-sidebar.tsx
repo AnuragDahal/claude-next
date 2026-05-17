@@ -66,6 +66,7 @@ export function ChatSidebar() {
     switchSession,
     deleteSession,
     createSession,
+    clearSessions,
   } = useChatStore();
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -255,19 +256,19 @@ export function ChatSidebar() {
                     )}
                   >
                     {user?.image && (
-                      <AvatarImage src={user.image} alt={user.name || "User"} />
+                      <AvatarImage src={user.image} alt={user.name || "Guest"} />
                     )}
                     <AvatarFallback className="bg-foreground text-background font-bold text-base">
-                      {user?.name?.[0]?.toUpperCase() || "U"}
+                      {user?.name?.[0]?.toUpperCase() || "G"}
                     </AvatarFallback>
                   </Avatar>
                   {state === "expanded" && (
                     <div className="flex flex-col">
                       <span className="text-sm font-semibold truncate max-w-[120px]">
-                        {user?.name || "User"}
+                        {user?.name || "Guest"}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        Free plan
+                        {user ? "Free plan" : "Not signed in"}
                       </span>
                     </div>
                   )}
@@ -289,7 +290,7 @@ export function ChatSidebar() {
               className="w-[280px] rounded-2xl p-2 shadow-2xl"
             >
               <div className="px-3 py-2 text-xs font-medium text-muted-foreground truncate">
-                {user?.email || "user@example.com"}
+                {user?.email || "Not signed in"}
               </div>
 
               <DropdownMenuSeparator />
@@ -343,13 +344,28 @@ export function ChatSidebar() {
                 <ChevronRight className="size-4 text-muted-foreground" />
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="gap-3 py-2.5 rounded-xl text-destructive focus:text-destructive cursor-pointer"
-                onClick={() => signOut({ callbackUrl: "/login" })}
-              >
-                <LogOut className="size-4" />
-                <span className="font-medium">Log out</span>
-              </DropdownMenuItem>
+              {user ? (
+                <DropdownMenuItem
+                  className="gap-3 py-2.5 rounded-xl text-destructive focus:text-destructive cursor-pointer"
+                  onClick={async () => {
+                    clearSessions();
+                    await signOut({ callbackUrl: "/login" });
+                  }}
+                >
+                  <LogOut className="size-4" />
+                  <span className="font-medium">Log out</span>
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  className="gap-3 py-2.5 rounded-xl text-primary focus:text-primary cursor-pointer"
+                  onClick={() => {
+                    window.location.href = "/login";
+                  }}
+                >
+                  <LogOut className="size-4 rotate-180" />
+                  <span className="font-medium">Log in</span>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarFooter>

@@ -11,6 +11,8 @@ import { useScroll } from "@/hooks/use-scroll";
 import { getGreeting } from "@/lib/utils/greeting";
 import { SidebarTrigger } from "../ui/sidebar";
 import { MoreHorizontal, Sparkles } from "lucide-react";
+import { useChatStore } from "@/store/chat-store";
+import { cn } from "@/lib/utils";
 
 
 export function ChatInterface() {
@@ -26,6 +28,7 @@ export function ChatInterface() {
   } = useChat();
   const messagesEndRef = useScroll(messages);
   const { user } = useAuth();
+  const { sessions } = useChatStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -47,7 +50,38 @@ export function ChatInterface() {
 
   const greeting = getGreeting();
   const isHome = messages.length === 0;
-  const userName = user?.name?.split(" ")[0] || "Anurag";
+  const userName = user?.name?.split(" ")[0] || "Guest";
+
+  const totalUserMessages = sessions.reduce((acc, s) => acc + s.messages.filter(m => m.role === "user").length, 0);
+  const isLimitReached = !user && totalUserMessages >= 5;
+
+  const renderLimitBanner = (isHomeLayout: boolean) => (
+    <div className={cn(
+      "w-full transition-all duration-500 flex flex-col items-center",
+      isHomeLayout ? "max-w-2xl px-4" : "p-4 md:p-6 sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent"
+    )}>
+      <div className={cn(
+        "w-full bg-card/60 backdrop-blur-xl border border-primary/20 rounded-3xl p-6 text-center shadow-xl flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500",
+        isHomeLayout ? "" : "max-w-3xl"
+      )}>
+        <div className="size-12 bg-primary/10 rounded-full flex items-center justify-center">
+          <Sparkles className="size-6 text-primary" />
+        </div>
+        <h3 className="text-xl font-semibold text-foreground">
+          You've reached the free limit
+        </h3>
+        <p className="text-sm text-muted-foreground max-w-md">
+          To continue this conversation and unlock advanced reasoning features, please sign in to your account.
+        </p>
+        <Button 
+          onClick={() => window.location.href = "/login"}
+          className="rounded-xl px-8 py-2 bg-primary hover:bg-primary/95 text-primary-foreground font-medium transition-all"
+        >
+          Sign in to continue
+        </Button>
+      </div>
+    </div>
+  );
 
 
   return (
@@ -88,16 +122,20 @@ export function ChatInterface() {
               </h1>
 
             </div>
-            <InputBar
-              input={input}
-              isLoading={isLoading}
-              isHome={true}
-              attachments={attachments}
-              addAttachments={addAttachments}
-              removeAttachment={removeAttachment}
-              handleInput={handleInput}
-              handleSend={handleSend}
-            />
+            {isLimitReached ? (
+              renderLimitBanner(true)
+            ) : (
+              <InputBar
+                input={input}
+                isLoading={isLoading}
+                isHome={true}
+                attachments={attachments}
+                addAttachments={addAttachments}
+                removeAttachment={removeAttachment}
+                handleInput={handleInput}
+                handleSend={handleSend}
+              />
+            )}
           </div>
         ) : (
           <>
@@ -106,16 +144,20 @@ export function ChatInterface() {
               isLoading={isLoading}
               messagesEndRef={messagesEndRef}
             />
-            <InputBar
-              input={input}
-              isLoading={isLoading}
-              isHome={false}
-              attachments={attachments}
-              addAttachments={addAttachments}
-              removeAttachment={removeAttachment}
-              handleInput={handleInput}
-              handleSend={handleSend}
-            />
+            {isLimitReached ? (
+              renderLimitBanner(false)
+            ) : (
+              <InputBar
+                input={input}
+                isLoading={isLoading}
+                isHome={false}
+                attachments={attachments}
+                addAttachments={addAttachments}
+                removeAttachment={removeAttachment}
+                handleInput={handleInput}
+                handleSend={handleSend}
+              />
+            )}
           </>
         )}
       </main>

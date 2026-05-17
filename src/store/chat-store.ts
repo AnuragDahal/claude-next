@@ -14,7 +14,7 @@ interface ChatState {
   selectedModel: string
   setSelectedModel: (model: string) => void
   getActiveSession: () => ChatSession | null
-
+  clearSessions: () => void
 }
 
 export const useChatStore = create<ChatState>()(
@@ -136,6 +136,9 @@ export const useChatStore = create<ChatState>()(
       getActiveSession: () => {
         const { sessions, activeSessionId } = get()
         return sessions.find((s) => s.id === activeSessionId) || null
+      },
+      clearSessions: () => {
+        set({ sessions: [], activeSessionId: null })
       },
     }),
     {

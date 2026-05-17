@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { type Message } from "@/lib/types";
 import { useChatStore } from "@/store/chat-store";
 import api from "@/lib/axios";
+import { useAuth } from "@/context/auth-context";
 
 export interface Attachment {
   file: File;
@@ -11,9 +12,10 @@ export interface Attachment {
 }
 
 export function useChat() {
-  const { addMessage, updateMessage, getActiveSession } = useChatStore();
+  const { addMessage, updateMessage, getActiveSession, sessions } = useChatStore();
   const activeSession = getActiveSession();
   const messages = activeSession?.messages || [];
+  const { user } = useAuth();
   
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +59,13 @@ export function useChat() {
 
   const handleSend = useCallback(async () => {
     if ((!input.trim() && attachments.length === 0) || isLoading) return;
+
+    // Enforce limit check for logged out users
+    const totalUserMessages = sessions.reduce((acc, s) => acc + s.messages.filter(m => m.role === "user").length, 0);
+    if (!user && totalUserMessages >= 5) {
+      window.location.href = "/login";
+      return;
+    }
 
     // TODO: Upload file to storage (Supabase, S3, etc.) before sending to LLM
     const messageAttachments = attachments.map(a => ({
@@ -119,7 +128,7 @@ export function useChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [input, attachments, isLoading, messages, addMessage, updateMessage]);
+  }, [input, attachments, isLoading, messages, addMessage, updateMessage, user, sessions]);
 
   return {
     messages,

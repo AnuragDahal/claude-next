@@ -258,13 +258,13 @@ export function ChatSidebar() {
                       <AvatarImage src={user.image} alt={user.name || "User"} />
                     )}
                     <AvatarFallback className="bg-foreground text-background font-bold text-base">
-                      {user?.name?.[0] || "A"}
+                      {user?.name?.[0]?.toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
                   {state === "expanded" && (
                     <div className="flex flex-col">
                       <span className="text-sm font-semibold truncate max-w-[120px]">
-                        {user?.name || "Anurag"}
+                        {user?.name || "User"}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         Free plan
@@ -289,7 +289,7 @@ export function ChatSidebar() {
               className="w-[280px] rounded-2xl p-2 shadow-2xl"
             >
               <div className="px-3 py-2 text-xs font-medium text-muted-foreground truncate">
-                {user?.email || "079bct010@ioepc.edu.np"}
+                {user?.email || "user@example.com"}
               </div>
 
               <DropdownMenuSeparator />

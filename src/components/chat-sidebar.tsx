@@ -41,6 +41,7 @@ import {
   Globe,
   HelpCircle,
   Info,
+  LogIn,
   LogOut,
   MessageSquare,
   Moon,
@@ -362,7 +363,7 @@ export function ChatSidebar() {
                     window.location.href = "/login";
                   }}
                 >
-                  <LogOut className="size-4 rotate-180" />
+                  <LogIn className="size-4" />
                   <span className="font-medium">Log in</span>
                 </DropdownMenuItem>
               )}

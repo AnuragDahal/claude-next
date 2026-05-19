@@ -60,7 +60,8 @@ import { useAuth } from "@/context/auth-context";
 
 export function ChatSidebar() {
   const [searchOpen, setSearchOpen] = useState(false);
-  const { state, toggleSidebar } = useSidebar();
+  const { state, toggleSidebar, isMobile } = useSidebar();
+  const isExpanded = state === "expanded" || isMobile;
   const {
     sessions,
     activeSessionId,
@@ -107,10 +108,10 @@ export function ChatSidebar() {
       <SidebarHeader
         className={cn(
           "pt-6 pb-0 flex flex-row items-center gap-4",
-          state === "expanded" ? "px-4 justify-between" : "px-2 justify-center",
+          isExpanded ? "px-4 justify-between" : "px-2 justify-center",
         )}
       >
-        {state === "expanded" && (
+        {isExpanded && (
           <h1
             className="text-2xl font-serif font-medium tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
             onClick={createSession}
@@ -130,15 +131,15 @@ export function ChatSidebar() {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            {state === "expanded" ? "Close sidebar" : "Open sidebar"}
+            {isExpanded ? "Close sidebar" : "Open sidebar"}
           </TooltipContent>
         </Tooltip>
       </SidebarHeader>
 
       <SidebarContent className="scrollbar-none pt-2">
-        <SidebarGroup className={state === "expanded" ? "px-4" : "px-2"}>
+        <SidebarGroup className={isExpanded ? "px-4" : "px-2"}>
           <SidebarMenu
-            className={cn(state === "expanded" ? "" : "items-center", "gap-1")}
+            className={cn(isExpanded ? "" : "items-center", "gap-1")}
           >
             <SidebarMenuItem>
               <SidebarMenuButton
@@ -189,7 +190,7 @@ export function ChatSidebar() {
         </SidebarGroup>
 
         <SidebarGroup
-          className={cn("mt-4 px-4", state === "collapsed" && "hidden")}
+          className={cn("mt-4 px-4", !isExpanded && "hidden")}
         >
           <SidebarGroupLabel className="px-0 text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
             Recents
@@ -231,12 +232,12 @@ export function ChatSidebar() {
 
       <div className="mt-auto">
         <Separator
-          className={cn("bg-border/50", state === "collapsed" && "hidden")}
+          className={cn("bg-border/50", !isExpanded && "hidden")}
         />
         <SidebarFooter
           className={cn(
             "flex flex-col",
-            state === "expanded" ? "p-4" : "p-2 gap-4",
+            isExpanded ? "p-4" : "p-2 gap-4",
           )}
         >
           <DropdownMenu>
@@ -244,7 +245,7 @@ export function ChatSidebar() {
               <div
                 className={cn(
                   "cursor-pointer hover:bg-sidebar-accent/50 rounded-xl transition-colors",
-                  state === "expanded"
+                  isExpanded
                     ? "flex items-center justify-between w-full p-2 -m-2"
                     : "flex flex-col items-center justify-center p-2",
                 )}
@@ -253,7 +254,7 @@ export function ChatSidebar() {
                   <Avatar
                     className={cn(
                       "border border-border",
-                      state === "expanded" ? "size-10" : "size-8",
+                      isExpanded ? "size-10" : "size-8",
                     )}
                   >
                     {user?.image && (
@@ -263,7 +264,7 @@ export function ChatSidebar() {
                       {user?.name?.[0]?.toUpperCase() || "G"}
                     </AvatarFallback>
                   </Avatar>
-                  {state === "expanded" && (
+                  {isExpanded && (
                     <div className="flex flex-col">
                       <span className="text-sm font-semibold truncate max-w-[120px]">
                         {user?.name || "Guest"}
@@ -274,7 +275,7 @@ export function ChatSidebar() {
                     </div>
                   )}
                 </div>
-                {state === "expanded" && (
+                {isExpanded && (
                   <Button
                     variant="ghost"
                     size="icon"

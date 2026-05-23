@@ -1,62 +1,66 @@
-# Claude Code UI - AI Chat Interface Starter
+# Claude Code UI
 
-A premium, minimalist AI chat interface template and starter project inspired by Claude.ai, built with Next.js, Tailwind CSS 4, and Shadcn UI.
+A premium, minimalist AI chat interface built with Next.js, Tailwind CSS, and shadcn/ui.
 
-## Features
+## What it does
 
-- **Minimalist Design**: Clean, typography-focused interface with a "parchment" aesthetic.
-- **Smart Conversations**: Supports streaming responses, markdown rendering, and code syntax highlighting.
-- **File Attachments**: Capability to upload and preview images and documents.
-- **Authentication**: Integrated Google OAuth via Next-Auth (v5).
-- **Dark Mode**: Fully supported with semantic color variables.
-- **Responsive Layout**: Works seamlessly on mobile and desktop with a collapsible sidebar.
+- Provides a Claude-inspired chat UI with streaming responses.
+- Supports authenticated access with NextAuth and Google OAuth.
+- Handles file attachments in the chat composer.
+- Renders markdown and code blocks in the message view.
 
-## Project Structure
+## Tech stack
 
-- `src/app`: Next.js App Router pages and global styles.
-- `src/components/chat`: Core chat components (`ChatInterface`, `MessageList`, `InputBar`).
-- `src/components/ui`: Reusable UI components from Shadcn UI.
-- `src/hooks`: Custom React hooks for chat logic and scroll management.
-- `src/context`: Authentication and global providers.
-- `src/lib`: Utility functions, types, and API clients.
+- Next.js 16 App Router
+- React 19
+- Tailwind CSS 4
+- shadcn/ui
+- NextAuth 5
+- Google Gemini via `@google/generative-ai`
 
-## Design System
+## Project structure
 
-The project uses a variable-based design system in `src/app/globals.css`. 
+- `src/app`: App Router pages, API routes, and global styles
+- `src/components/chat`: Chat UI components
+- `src/components/ui`: Reusable UI primitives
+- `src/hooks`: Chat and scrolling behavior
+- `src/store`: Chat session state
+- `src/lib`: Shared types, auth helpers, and axios client
+- `src/context`: Auth context and providers
 
-- **Primary Colors**: Use `--primary` (Claude Orange) for accents.
-- **Semantic Tokens**: Custom tokens for code blocks (`--code-bg`), scrollbars (`--scrollbar-thumb`), and sidebars.
-- **Tailwind 4**: Leverages the latest Tailwind features for styling.
+## Core flow
 
-## Integration Guide
+1. The user sends a message through `useChat`.
+2. `useChat` posts the message to `/api/chat`.
+3. `src/app/api/chat/route.ts` streams Gemini output back to the client.
+4. `useChat` updates the assistant message as chunks arrive.
 
-### 1. Backend API
-The chat interface expects an API route at `/api/chat`. You can replace the current mock/Google integration in `src/app/api/chat/route.ts` with your preferred LLM provider.
-
-### 2. State Management
-The chat state is managed by `useChat` hook which interfaces with the backend. For complex state, consider extending the `zustand` store in `src/store`.
-
-### 3. Styling
-To change the theme, update the CSS variables in `:root` and `.dark` blocks in `src/app/globals.css`. All components are mapped to these variables.
-
-## Getting Started
+## Setup
 
 1. Install dependencies:
    ```bash
    pnpm install
    ```
 
-2. Set up environment variables in `.env.local`:
+2. Create `.env.local` with:
    ```env
    GOOGLE_CLIENT_ID=...
    GOOGLE_CLIENT_SECRET=...
    NEXTAUTH_SECRET=...
-   NEXT_PUBLIC_GEMINI_API_KEY=...
+   GEMINI_API_KEY=...
+   GEMINI_MODEL=...
    ```
 
-3. Run the development server:
+3. Start the app:
    ```bash
    pnpm dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. Open http://localhost:3000
+
+## Important implementation notes
+
+- Keep styling aligned with `src/app/globals.css` and use the existing CSS variables.
+- Reuse the existing chat components instead of creating new UI primitives unless necessary.
+- The current chat API uses streaming and expects the response payload to be plain text chunks.
+- Attachment handling is client-side only; no storage backend is implemented yet.

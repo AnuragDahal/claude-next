@@ -1,51 +1,85 @@
 ---
 name: claude-architect
-description: Intelligence for maintaining and extending the Claude Code UI architecture, design system, and chat logic.
+description: Guidance for maintaining the Claude Code UI architecture, styling system, chat flow, and auth integration.
 ---
 
 # Claude Architect Skill
 
-This skill provides guidelines and patterns for maintaining the high-fidelity Claude.ai clone. Use this to ensure UI consistency, proper variable usage, and clean architectural splits.
+Use this skill when editing or extending the app. The goal is to preserve the current visual system, chat behavior, and authentication flow while keeping changes small and consistent.
 
-## Design Philosophy
+## Project purpose
 
-1. **Parchment Aesthetic**: The UI should feel like paper/parchment. Use `#fbfaf8` (or `--background`) for light mode.
-2. **Typography First**: Focus on readability. Use Serif fonts for headings and clean Sans for messages.
-3. **Subtle Interactions**: Use `animate-in`, `fade-in`, and smooth transitions for all state changes.
-4. **Variable-Driven**: NEVER use hardcoded hex codes for primary/secondary colors. Always use Tailwind utility classes (`text-primary`, `bg-secondary`) or CSS variables (`var(--code-bg)`).
+This is a Next.js chat UI inspired by Claude.ai. It is not a generic dashboard; most changes should stay within the existing chat, auth, and styling patterns.
 
-## CSS Variable Map
+## Architecture
 
-Maintain the following variables in `src/app/globals.css`:
+### App shell and routes
+- `src/app`: App Router pages, layouts, global CSS, and API routes.
+- `src/app/api/chat/route.ts`: Server route that streams Gemini responses.
+- `src/app/(auth)/login/page.tsx`: Login page for authenticated access.
 
-| Variable | Usage |
-|----------|-------|
-| `--primary` | Claude Orange accents |
-| `--secondary` | Message bubble backgrounds |
-| `--code-bg` | Code block background |
-| `--code-border`| Code block borders |
-| `--scrollbar-thumb` | Custom scrollbar colors |
+### UI and shared components
+- `src/components/chat`: Chat-specific components such as the main interface, input bar, message list, and message renderer.
+- `src/components/ui`: Reusable shadcn/ui primitives. Prefer these before creating new UI pieces.
 
-## Component Guidelines
+### State and logic
+- `src/hooks/use-chat.ts`: Main chat flow. Handles input, attachments, sending, and streaming updates.
+- `src/store/chat-store.ts`: Chat session store. Update state here when changing chat/session behavior.
+- `src/lib/types.ts`: Message and chat session types. Keep these in sync with any API or UI changes.
+- `src/context/auth-context.tsx` and `src/lib/auth.ts`: Authentication flow and NextAuth configuration.
 
-### Chat Components
-- **`ChatInterface`**: The layout orchestrator. Manages the high-level state (Home vs Chat).
-- **`MessageList`**: Handles scroll logic. Must use `useScroll` hook for auto-scrolling.
-- **`InputBar`**: The complex input area. Handles auto-resize, attachments, and send logic.
-- **`MessageContent`**: Pure markdown renderer. Uses `react-markdown` and `rehype-highlight`.
+## Chat flow
 
-### Logic & Hooks
-- **`useChat`**: Central hook for message state, streaming, and attachment management.
-- **`useScroll`**: Specialized hook for "smart" auto-scrolling that respects user manual scrolling.
+1. User enters text or attachments in the composer.
+2. `useChat` creates a user message and adds it to the current session.
+3. `useChat` posts the message to `/api/chat`.
+4. The API route streams Gemini output chunk-by-chunk.
+5. `useChat` updates the assistant message incrementally.
 
-## Further Integration
+If you change the provider or response format, keep the client logic compatible with the current streaming behavior and `Message` type.
 
-To replace the mock logic with a real LLM:
-1. Update `src/hooks/use-chat.ts` to point to the correct endpoint.
-2. Ensure the response format matches the `Message` type in `src/lib/types.ts`.
-3. If using streaming, handle the partial updates in the `useChat` hook's `handleSend` function.
+## Styling rules
 
-## Maintenance Rules
-- Always check `globals.css` before adding new colors.
-- Ensure `dark mode` is tested for every new component.
-- Keep the `prose` (Markdown) styles consistent in `message-content.tsx`.
+- Use the existing CSS variables in `src/app/globals.css`.
+- Do not add hardcoded color values for primary UI accents.
+- Keep markdown styling consistent in `src/components/chat/message-content.tsx`.
+- Prefer Tailwind utility classes and semantic variables over custom color literals.
+
+## Component rules
+
+- Use `src/components/chat` for chat-specific behavior.
+- Use `src/components/ui` for reusable UI primitives.
+- Keep `MessageList` and scrolling behavior consistent with the current `useScroll` hook.
+- Keep the input bar behavior in `InputBar` unless a new interaction needs to be added.
+
+## Auth rules
+
+- Authentication is handled by NextAuth.
+- Do not bypass the existing auth context unless the change is explicitly about login or session behavior.
+- Preserve the current Google OAuth setup unless you are intentionally changing the provider.
+
+## Environment and local setup
+
+Required environment variables:
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `NEXTAUTH_SECRET`
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL`
+
+Run locally with:
+- `pnpm install`
+- `pnpm dev`
+
+## Maintenance checklist
+
+Before making changes:
+1. Check `src/app/globals.css` if the change affects styling.
+2. Check `src/hooks/use-chat.ts` if the change affects message sending or streaming.
+3. Check `src/lib/types.ts` if the change affects message/session shape.
+4. Check `src/app/api/chat/route.ts` if the change affects the model integration.
+
+When adding new features:
+- Reuse existing components where possible.
+- Keep the architecture small and avoid introducing extra state unless it is necessary.
+- Prefer incremental changes that preserve the current chat flow.

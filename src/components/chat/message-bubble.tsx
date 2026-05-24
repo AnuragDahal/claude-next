@@ -7,7 +7,7 @@ import {
   Paperclip,
   Pencil,
   RotateCcw,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import { useState } from "react";
 import { MessageContent } from "./message-content";
@@ -15,9 +15,16 @@ import { MessageContent } from "./message-content";
 interface MessageBubbleProps {
   message: Message;
   isLoading?: boolean;
+  showRetry?: boolean;
+  onRetry?: () => void;
 }
 
-export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
+export function MessageBubble({
+  message,
+  isLoading,
+  showRetry,
+  onRetry,
+}: MessageBubbleProps) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
 
@@ -40,7 +47,7 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
     <div
       className={cn(
         "flex gap-4 group animate-in fade-in slide-in-from-bottom-2 duration-300",
-        isUser ? "flex-row-reverse" : "flex-row"
+        isUser ? "flex-row-reverse" : "flex-row",
       )}
     >
       {!isUser && (
@@ -54,9 +61,7 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
       <div
         className={cn(
           "flex flex-col gap-1 min-w-0 flex-1",
-          isUser
-            ? "items-end ml-auto max-w-[70%]"
-            : "items-start max-w-none"
+          isUser ? "items-end ml-auto max-w-[70%]" : "items-start max-w-none",
         )}
       >
         {message.attachments && message.attachments.length > 0 && (
@@ -81,7 +86,7 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
                   <Paperclip className="size-3" />
                   <span>{attachment.name}</span>
                 </div>
-              )
+              ),
             )}
           </div>
         )}
@@ -90,7 +95,7 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
             "text-[15px] leading-relaxed whitespace-pre-wrap w-full overflow-hidden",
             isUser
               ? "bg-secondary text-foreground px-5 py-3 rounded-[24px] border border-black/[0.03]"
-              : "text-foreground font-sans text-[16px] tracking-normal"
+              : "text-foreground font-sans text-[16px] tracking-normal",
           )}
         >
           {!isUser && message.content === "" && isLoading ? (
@@ -106,12 +111,11 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
           )}
         </div>
 
-        {/* Message Footer - only show when not loading */}
         {!isLoading && (
           <div
             className={cn(
               "flex items-center gap-3 mt-1 text-muted-foreground text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200",
-              isUser ? "flex-row-reverse mr-2" : "ml-0"
+              isUser ? "flex-row-reverse mr-2" : "ml-0",
             )}
           >
             <span>{formatDate(message.timestamp)}</span>
@@ -128,7 +132,9 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={showRetry ? onRetry : undefined}
                   className="size-7 rounded-full hover:bg-muted/50 text-inherit"
+                  disabled={!showRetry}
                 >
                   <RotateCcw className="size-3.5" />
                 </Button>

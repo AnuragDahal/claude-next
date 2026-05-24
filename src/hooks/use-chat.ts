@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { type Message } from "@/lib/types";
 import { useChatStore } from "@/store/chat-store";
 import api from "@/lib/axios";
@@ -12,27 +12,54 @@ export interface Attachment {
 }
 
 export function useChat() {
-  const { addMessage, updateMessage, getActiveSession, sessions } = useChatStore();
+  const {
+    addMessage,
+    updateMessage,
+    updateMessageStatus,
+    removeMessage,
+    getActiveSession,
+    sessions,
+  } = useChatStore();
+
   const activeSession = getActiveSession();
   const messages = activeSession?.messages || [];
   const { user } = useAuth();
-  
+
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Cleanup object URLs
   useEffect(() => {
     return () => {
+      abortControllerRef.current?.abort();
       attachments.forEach((a) => URL.revokeObjectURL(a.preview));
     };
   }, [attachments]);
 
-  const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    e.target.style.height = "auto";
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 300)}px`;
+  const isAbortError = useCallback((error: unknown) => {
+    if (!error || typeof error !== "object") return false;
+
+    const name = "name" in error ? String(error.name) : "";
+    const code = "code" in error ? String(error.code) : "";
+    const message = "message" in error ? String(error.message) : "";
+
+    return (
+      name === "CanceledError" ||
+      name === "AbortError" ||
+      code === "ERR_CANCELED" ||
+      message.toLowerCase().includes("cancel")
+    );
   }, []);
+
+  const handleInput = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setInput(e.target.value);
+      e.target.style.height = "auto";
+      e.target.style.height = `${Math.min(e.target.scrollHeight, 300)}px`;
+    },
+    [],
+  );
 
   const addAttachments = useCallback((files: FileList) => {
     const newAttachments: Attachment[] = [];
@@ -57,78 +84,151 @@ export function useChat() {
     });
   }, []);
 
-  const handleSend = useCallback(async () => {
-    if ((!input.trim() && attachments.length === 0) || isLoading) return;
-
-    // Enforce limit check for logged out users
-    const totalUserMessages = sessions.reduce((acc, s) => acc + s.messages.filter(m => m.role === "user").length, 0);
-    if (!user && totalUserMessages >= 5) {
-      window.location.href = "/login";
-      return;
-    }
-
-    // TODO: Upload file to storage (Supabase, S3, etc.) before sending to LLM
-    const messageAttachments = attachments.map(a => ({
-      preview: a.preview,
-      type: a.type,
-      name: a.name
-    }));
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input,
-      attachments: messageAttachments.length > 0 ? messageAttachments : undefined,
-      timestamp: Date.now(),
-    };
-
-    addMessage(userMessage);
+  const resetComposer = useCallback(() => {
     setInput("");
     setAttachments([]);
 
-    // Reset textarea heights after sending
     setTimeout(() => {
       const textareas = document.querySelectorAll("textarea");
       textareas.forEach((t) => (t.style.height = ""));
     }, 0);
+  }, []);
 
-    setIsLoading(true);
+  const cancelActiveRequest = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
 
-    try {
-      // TODO: Switch model or provider here — swap Gemini for Anthropic/OpenAI if needed
+  const sendMessage = useCallback(
+    async (messageContent: string, messageAttachments: Attachment[] = []) => {
+      if (
+        (!messageContent.trim() && messageAttachments.length === 0) ||
+        isLoading
+      )
+        return;
+
+      const totalUserMessages = sessions.reduce(
+        (acc, s) => acc + s.messages.filter((m) => m.role === "user").length,
+        0,
+      );
+
+      if (!user && totalUserMessages >= 5) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: "user",
+        content: messageContent,
+        attachments:
+          messageAttachments.length > 0
+            ? messageAttachments.map((attachment) => ({
+                preview: attachment.preview,
+                type: attachment.type,
+                name: attachment.name,
+              }))
+            : undefined,
+        timestamp: Date.now(),
+      };
+
+      addMessage(userMessage);
+      resetComposer();
+
       const assistantId = (Date.now() + 1).toString();
-      const assistantMessage: Message = {
+      addMessage({
         id: assistantId,
         role: "assistant",
         content: "",
         timestamp: Date.now(),
-      };
+        status: "streaming",
+      });
 
-      addMessage(assistantMessage);
+      const requestMessages = [...messages, userMessage];
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      setIsLoading(true);
 
-      await api.post("/api/chat", { 
-        messages: [...messages, userMessage],
-      }, {
-        responseType: "text",
-        onDownloadProgress: (progressEvent) => {
-          const content = progressEvent.event.target.responseText;
-          updateMessage(assistantId, content);
+      try {
+        await api.post(
+          "/api/chat",
+          {
+            messages: requestMessages,
+          },
+          {
+            responseType: "text",
+            signal: controller.signal,
+            onDownloadProgress: (progressEvent) => {
+              const content = progressEvent.event.target.responseText;
+              updateMessage(assistantId, content);
+            },
+          },
+        );
+
+        updateMessageStatus(assistantId, "idle");
+      } catch (error) {
+        const currentAssistant = getActiveSession()?.messages.find(
+          (m) => m.id === assistantId,
+        );
+
+        if (isAbortError(error)) {
+          if (!currentAssistant?.content) {
+            updateMessage(assistantId, "Generation cancelled.");
+          }
+          updateMessageStatus(assistantId, "cancelled");
+        } else {
+          if (!currentAssistant?.content) {
+            updateMessage(
+              assistantId,
+              "Sorry, I encountered an error. Please try again.",
+            );
+          }
+          updateMessageStatus(assistantId, "error");
         }
-      });
-    } catch (error) {
-      console.error("Streaming error:", error);
-      // Fallback message
-      const errorId = (Date.now() + 2).toString();
-      addMessage({
-        id: errorId,
-        role: "assistant",
-        content: "Sorry, I encountered an error. Please make sure your GEMINI_API_KEY is set in .env.local.",
-        timestamp: Date.now(),
-      });
-    } finally {
-      setIsLoading(false);
+      } finally {
+        abortControllerRef.current = null;
+        setIsLoading(false);
+      }
+    },
+    [
+      addMessage,
+      getActiveSession,
+      isAbortError,
+      isLoading,
+      messages,
+      resetComposer,
+      sessions,
+      updateMessage,
+      updateMessageStatus,
+      user,
+    ],
+  );
+
+  const handleSend = useCallback(() => {
+    sendMessage(input, attachments);
+  }, [attachments, input, sendMessage]);
+
+  const retryLastResponse = useCallback(() => {
+    const activeSession = getActiveSession();
+    if (!activeSession) return;
+
+    const lastAssistant = [...activeSession.messages]
+      .reverse()
+      .find((message) => message.role === "assistant");
+    if (
+      !lastAssistant ||
+      (lastAssistant.status !== "error" && lastAssistant.status !== "cancelled")
+    ) {
+      return;
     }
-  }, [input, attachments, isLoading, messages, addMessage, updateMessage, user, sessions]);
+
+    const lastUser = [...activeSession.messages]
+      .reverse()
+      .find((message) => message.role === "user");
+    if (!lastUser) return;
+
+    removeMessage(lastAssistant.id);
+    sendMessage(lastUser.content);
+  }, [getActiveSession, removeMessage, sendMessage]);
 
   return {
     messages,
@@ -140,5 +240,7 @@ export function useChat() {
     removeAttachment,
     handleInput,
     handleSend,
+    cancelActiveRequest,
+    retryLastResponse,
   };
 }

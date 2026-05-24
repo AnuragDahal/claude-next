@@ -8,9 +8,15 @@ interface MessageListProps {
   messages: Message[];
   isLoading: boolean;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  onRetry: () => void;
 }
 
-export function MessageList({ messages, isLoading, messagesEndRef }: MessageListProps) {
+export function MessageList({
+  messages,
+  isLoading,
+  messagesEndRef,
+  onRetry,
+}: MessageListProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
@@ -23,7 +29,6 @@ export function MessageList({ messages, isLoading, messagesEndRef }: MessageList
     const handleScroll = () => {
       if (containerRef.current) {
         const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-        // Threshold of 50px for better precision
         const isNearBottom = scrollHeight - scrollTop - clientHeight < 50;
         setShowScrollButton(!isNearBottom);
       }
@@ -32,7 +37,6 @@ export function MessageList({ messages, isLoading, messagesEndRef }: MessageList
     const container = containerRef.current;
     if (container) {
       container.addEventListener("scroll", handleScroll);
-      // Initial check
       handleScroll();
       return () => container.removeEventListener("scroll", handleScroll);
     }
@@ -44,31 +48,38 @@ export function MessageList({ messages, isLoading, messagesEndRef }: MessageList
       const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
       const lastMessageIsUser = messages[messages.length - 1].role === "user";
 
-      // Auto-scroll if near bottom or if the user just sent a message
       if (isNearBottom || lastMessageIsUser) {
-        // Use "auto" for streaming updates to make it feel more responsive
-        // and "smooth" for new user messages.
         const behavior = lastMessageIsUser ? "smooth" : "auto";
         messagesEndRef.current?.scrollIntoView({ behavior });
       }
     }
   }, [messages, messagesEndRef]);
 
+  const lastAssistantMessage = [...messages]
+    .reverse()
+    .find((message) => message.role === "assistant");
+
   return (
     <div className="flex-1 relative flex flex-col min-h-0 overflow-hidden">
-      <div 
-        ref={containerRef} 
+      <div
+        ref={containerRef}
         className="flex-1 overflow-y-auto scroll-smooth custom-scrollbar"
       >
         <div className="max-w-3xl mx-auto pt-16 pb-10 px-4 md:px-0 flex flex-col gap-10">
           {messages.map((message, index) => (
-            <MessageBubble 
-              key={message.id} 
-              message={message} 
-              isLoading={isLoading && index === messages.length - 1} 
+            <MessageBubble
+              key={message.id}
+              message={message}
+              isLoading={isLoading && index === messages.length - 1}
+              showRetry={
+                message.id === lastAssistantMessage?.id &&
+                !isLoading &&
+                (message.status === "error" || message.status === "cancelled")
+              }
+              onRetry={onRetry}
             />
           ))}
-          
+
           <div ref={messagesEndRef} className="h-32 shrink-0" />
         </div>
       </div>

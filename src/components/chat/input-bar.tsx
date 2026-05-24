@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Check } from "lucide-react";
 
-
 interface InputBarProps {
   input: string;
   isLoading: boolean;
@@ -23,29 +22,25 @@ interface InputBarProps {
   removeAttachment: (index: number) => void;
   handleInput: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleSend: () => void;
+  cancelActiveRequest: () => void;
 }
 
-export function InputBar({ 
-  input, 
-  isLoading, 
-  isHome, 
+export function InputBar({
+  input,
+  isLoading,
+  isHome,
   attachments,
   addAttachments,
   removeAttachment,
-  handleInput, 
-  handleSend 
+  handleInput,
+  handleSend,
+  cancelActiveRequest,
 }: InputBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { selectedModel, setSelectedModel } = useChatStore();
 
-  const models = [
-    "Sonnet 4.5",
-    "Haiku 4.5",
-    "Opus 5.6",
-  ];
-
-
+  const models = ["Sonnet 4.5", "Haiku 4.5", "Opus 5.6"];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -53,7 +48,6 @@ export function InputBar({
     }
   };
 
-  // Auto-grow textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -64,10 +58,17 @@ export function InputBar({
   const renderAttachments = () => (
     <div className="flex flex-wrap gap-2 mb-2 px-2 pt-2">
       {attachments.map((attachment, index) => (
-        <div key={index} className="relative group animate-in zoom-in-95 duration-200">
+        <div
+          key={index}
+          className="relative group animate-in zoom-in-95 duration-200"
+        >
           {attachment.type.startsWith("image/") ? (
             <div className="size-16 rounded-lg border border-border overflow-hidden bg-muted">
-              <img src={attachment.preview} alt="preview" className="size-full object-cover" />
+              <img
+                src={attachment.preview}
+                alt="preview"
+                className="size-full object-cover"
+              />
             </div>
           ) : (
             <div className="h-8 px-3 rounded-full border border-border bg-muted flex items-center gap-2 text-xs font-medium max-w-[150px]">
@@ -89,22 +90,30 @@ export function InputBar({
   const canSend = input.trim() || attachments.length > 0;
 
   return (
-    <div className={cn(
-      "w-full transition-all duration-500",
-      isHome ? "max-w-2xl px-4" : "p-4 md:p-6 sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent"
-    )}>
-      <input 
-        type="file" 
-        multiple 
-        hidden 
-        ref={fileInputRef} 
+    <div
+      className={cn(
+        "w-full transition-all duration-500",
+        isHome
+          ? "max-w-2xl px-4"
+          : "p-4 md:p-6 sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent",
+      )}
+    >
+      <input
+        type="file"
+        multiple
+        hidden
+        ref={fileInputRef}
         onChange={handleFileChange}
         accept="image/*,.pdf,.txt"
       />
-      <div className={cn(
-        "relative flex flex-col mx-auto transition-all duration-300",
-        isHome ? "bg-card border border-border rounded-[28px] p-2" : "max-w-3xl bg-card border border-border shadow-sm rounded-[2rem] p-1.5"
-      )}>
+      <div
+        className={cn(
+          "relative flex flex-col mx-auto transition-all duration-300",
+          isHome
+            ? "bg-card border border-border rounded-[28px] p-2"
+            : "max-w-3xl bg-card border border-border shadow-sm rounded-[2rem] p-1.5",
+        )}
+      >
         {attachments.length > 0 && renderAttachments()}
         <Textarea
           ref={textareaRef}
@@ -113,15 +122,19 @@ export function InputBar({
           placeholder="How can I help you today?"
           className={cn(
             "w-full min-h-[44px] max-h-[240px] overflow-y-auto bg-transparent dark:bg-transparent border-none focus-visible:ring-0 resize-none py-3 px-6 text-base placeholder:text-muted-foreground/40 placeholder:animate-in placeholder:fade-in placeholder:duration-1000 leading-relaxed shadow-none",
-            isHome && "min-h-[100px] text-lg py-5"
+            isHome && "min-h-[100px] text-lg py-5",
           )}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
+              if (isLoading) {
+                cancelActiveRequest();
+                return;
+              }
               handleSend();
             }
           }}
-          disabled={isLoading && !canSend} // Allow stop button if loading
+          disabled={isLoading && !canSend}
           rows={1}
         />
         <div className="flex items-center justify-between px-4 py-2">
@@ -143,14 +156,14 @@ export function InputBar({
                   size="sm"
                   className="h-8 gap-1.5 rounded-xl px-3 text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
                 >
-                  <span className="text-xs font-medium">
-                    {selectedModel}
-                  </span>
-
+                  <span className="text-xs font-medium">{selectedModel}</span>
                   <ChevronDown className="size-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[200px] rounded-xl p-1 shadow-2xl">
+              <DropdownMenuContent
+                align="end"
+                className="w-[200px] rounded-xl p-1 shadow-2xl"
+              >
                 {models.map((model) => (
                   <DropdownMenuItem
                     key={model}
@@ -158,7 +171,9 @@ export function InputBar({
                     onClick={() => setSelectedModel(model)}
                   >
                     <span className="flex-1 text-sm">{model}</span>
-                    {selectedModel === model && <Check className="size-4 text-primary" />}
+                    {selectedModel === model && (
+                      <Check className="size-4 text-primary" />
+                    )}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -167,15 +182,17 @@ export function InputBar({
             <div className="h-4 w-px bg-border/20 mx-1" />
 
             <Button
-              onClick={handleSend}
-              disabled={!canSend && !isLoading}
+              onClick={isLoading ? cancelActiveRequest : handleSend}
+              disabled={!isLoading && !canSend}
               variant={canSend ? "default" : "ghost"}
               size="icon"
               className={cn(
                 "size-9 rounded-full transition-all duration-200",
-                canSend 
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                  : "hover:bg-muted text-muted-foreground"
+                isLoading
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : canSend
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "hover:bg-muted text-muted-foreground",
               )}
             >
               {isLoading ? (

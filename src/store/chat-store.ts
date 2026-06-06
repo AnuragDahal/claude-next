@@ -21,6 +21,7 @@ interface ChatState {
   setSelectedModel: (model: string) => void;
   getActiveSession: () => ChatSession | null;
   clearSessions: () => void;
+  syncMessages: (id: string, messages: Message[]) => void;
 }
 
 export const useChatStore = create<ChatState>()(
@@ -196,6 +197,30 @@ export const useChatStore = create<ChatState>()(
 
       clearSessions: () => {
         set({ sessions: [], activeSessionId: null });
+      },
+
+      syncMessages: (id, messages) => {
+        set((state) => {
+          const sessionIndex = state.sessions.findIndex((s) => s.id === id);
+          if (sessionIndex === -1) return state;
+
+          const session = state.sessions[sessionIndex];
+          const updatedSessions = [...state.sessions];
+          
+          let newTitle = session.title;
+          if (session.title === "Untitled" && messages.length > 0 && messages[0].role === "user") {
+            newTitle = messages[0].content.substring(0, 40);
+          }
+
+          updatedSessions[sessionIndex] = {
+            ...session,
+            title: newTitle,
+            messages,
+            updatedAt: Date.now(),
+          };
+
+          return { sessions: updatedSessions };
+        });
       },
     }),
     {

@@ -5,10 +5,11 @@ import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
+import "highlight.js/styles/github-dark.css";
 
 interface MessageContentProps {
   content: string;
-  role?: "user" | "assistant";
+  role?: "user" | "assistant" | "system" | "data" | "tool" | "function";
 }
 
 export function MessageContent({
@@ -63,18 +64,18 @@ export function MessageContent({
           ),
           ul: ({ node, ...props }) => (
             <ul
-              className="list-none pl-0 mb-3 space-y-1"
+              className="list-disc pl-5 mb-3 space-y-1"
               {...props}
             />
           ),
           ol: ({ node, ...props }) => (
-            <ul
-              className="list-none pl-0 mb-3 space-y-1"
+            <ol
+              className="list-decimal pl-5 mb-3 space-y-1"
               {...props}
             />
           ),
           li: ({ node, ...props }) => (
-            <li className="pl-0 leading-normal mb-1.5 last:mb-0 [&>*]:inline [&>*]:m-0" {...props} />
+            <li className="leading-normal mb-1.5 last:mb-0 text-foreground" {...props} />
           ),
           blockquote: ({ node, ...props }) => (
             <blockquote
@@ -107,7 +108,10 @@ export function MessageContent({
           ),
           code: ({ node, inline, className, children, ...props }: any) => {
             const match = /language-(\w+)/.exec(className || "");
-            const isCodeBlock = !inline;
+            
+            // Safer code-block check: check if it has a class like language-* or contains newlines
+            const rawContent = String(children);
+            const isCodeBlock = !inline && (match || rawContent.includes("\n"));
 
             if (isCodeBlock) {
               // Extract text content safely even if children is a tree (from rehype-highlight)

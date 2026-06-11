@@ -1,8 +1,9 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { type Message } from "@/lib/types";
 import { useChatStore } from "@/store/chat-store";
-import api from "@/lib/axios";
 import { useAuth } from "@/context/auth-context";
+import { useChat as useAiChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 
 export interface Attachment {
   file: File;
@@ -12,45 +13,72 @@ export interface Attachment {
 }
 
 export function useChat() {
-  const {
-    addMessage,
-    updateMessage,
-    updateMessageStatus,
-    removeMessage,
-    getActiveSession,
-    sessions,
-  } = useChatStore();
+  const { getActiveSession, sessions, syncMessages } = useChatStore();
 
   const activeSession = getActiveSession();
-  const messages = activeSession?.messages || [];
   const { user } = useAuth();
-
+  
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     return () => {
-      abortControllerRef.current?.abort();
       attachments.forEach((a) => URL.revokeObjectURL(a.preview));
     };
   }, [attachments]);
 
-  const isAbortError = useCallback((error: unknown) => {
-    if (!error || typeof error !== "object") return false;
+  const {
+    messages: rawMessages,
+    setMessages,
+    sendMessage,
+    stop,
+    regenerate,
+    error,
+    status
+  } = useAiChat({
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+    }),
+    id: activeSession?.id || "default",
+    messages: activeSession?.messages || [],
+  });
 
-    const name = "name" in error ? String(error.name) : "";
-    const code = "code" in error ? String(error.code) : "";
-    const message = "message" in error ? String(error.message) : "";
-
-    return (
-      name === "CanceledError" ||
-      name === "AbortError" ||
-      code === "ERR_CANCELED" ||
-      message.toLowerCase().includes("cancel")
-    );
+  const getMessageContent = useCallback((m: any): string => {
+    if (m.content !== undefined) return m.content;
+    if (m.parts && Array.isArray(m.parts)) {
+      return m.parts
+        .filter((part: any) => part.type === "text")
+        .map((part: any) => part.text)
+        .join("");
+    }
+    return "";
   }, []);
+
+  const messages: Message[] = React.useMemo(() => {
+    return rawMessages.map((m) => ({
+      ...m,
+      content: getMessageContent(m),
+    }));
+  }, [rawMessages, getMessageContent]);
+
+  const isLoading = status === "streaming" || status === "submitted";
+
+  // Sync to chat-store when messages update
+  useEffect(() => {
+    if (activeSession?.id && messages.length > 0) {
+      syncMessages(activeSession.id, messages);
+    }
+  }, [messages, activeSession?.id, syncMessages]);
+
+  // Handle active session switch to load correct messages
+  useEffect(() => {
+    if (activeSession) {
+      setMessages(activeSession.messages || []);
+    } else {
+      setMessages([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSession?.id, setMessages]);
 
   const handleInput = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -58,7 +86,7 @@ export function useChat() {
       e.target.style.height = "auto";
       e.target.style.height = `${Math.min(e.target.scrollHeight, 300)}px`;
     },
-    [],
+    [setInput],
   );
 
   const addAttachments = useCallback((files: FileList) => {
@@ -92,143 +120,45 @@ export function useChat() {
       const textareas = document.querySelectorAll("textarea");
       textareas.forEach((t) => (t.style.height = ""));
     }, 0);
-  }, []);
+  }, [setInput]);
 
-  const cancelActiveRequest = useCallback(() => {
-    abortControllerRef.current?.abort();
-  }, []);
+  const handleSend = useCallback(async () => {
+    if ((!input.trim() && attachments.length === 0) || isLoading) return;
 
-  const sendMessage = useCallback(
-    async (messageContent: string, messageAttachments: Attachment[] = []) => {
-      if (
-        (!messageContent.trim() && messageAttachments.length === 0) ||
-        isLoading
-      )
-        return;
+    const totalUserMessages = sessions.reduce(
+      (acc, s) => acc + s.messages.filter((m) => m.role === "user").length,
+      0,
+    );
 
-      const totalUserMessages = sessions.reduce(
-        (acc, s) => acc + s.messages.filter((m) => m.role === "user").length,
-        0,
-      );
-
-      if (!user && totalUserMessages >= 5) {
-        window.location.href = "/login";
-        return;
-      }
-
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: "user",
-        content: messageContent,
-        attachments:
-          messageAttachments.length > 0
-            ? messageAttachments.map((attachment) => ({
-                preview: attachment.preview,
-                type: attachment.type,
-                name: attachment.name,
-              }))
-            : undefined,
-        timestamp: Date.now(),
-      };
-
-      addMessage(userMessage);
-      resetComposer();
-
-      const assistantId = (Date.now() + 1).toString();
-      addMessage({
-        id: assistantId,
-        role: "assistant",
-        content: "",
-        timestamp: Date.now(),
-        status: "streaming",
-      });
-
-      const requestMessages = [...messages, userMessage];
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-      setIsLoading(true);
-
-      try {
-        await api.post(
-          "/api/chat",
-          {
-            messages: requestMessages,
-          },
-          {
-            responseType: "text",
-            signal: controller.signal,
-            onDownloadProgress: (progressEvent) => {
-              const content = progressEvent.event.target.responseText;
-              updateMessage(assistantId, content);
-            },
-          },
-        );
-
-        updateMessageStatus(assistantId, "idle");
-      } catch (error) {
-        const currentAssistant = getActiveSession()?.messages.find(
-          (m) => m.id === assistantId,
-        );
-
-        if (isAbortError(error)) {
-          if (!currentAssistant?.content) {
-            updateMessage(assistantId, "Generation cancelled.");
-          }
-          updateMessageStatus(assistantId, "cancelled");
-        } else {
-          if (!currentAssistant?.content) {
-            updateMessage(
-              assistantId,
-              "Sorry, I encountered an error. Please try again.",
-            );
-          }
-          updateMessageStatus(assistantId, "error");
-        }
-      } finally {
-        abortControllerRef.current = null;
-        setIsLoading(false);
-      }
-    },
-    [
-      addMessage,
-      getActiveSession,
-      isAbortError,
-      isLoading,
-      messages,
-      resetComposer,
-      sessions,
-      updateMessage,
-      updateMessageStatus,
-      user,
-    ],
-  );
-
-  const handleSend = useCallback(() => {
-    sendMessage(input, attachments);
-  }, [attachments, input, sendMessage]);
-
-  const retryLastResponse = useCallback(() => {
-    const activeSession = getActiveSession();
-    if (!activeSession) return;
-
-    const lastAssistant = [...activeSession.messages]
-      .reverse()
-      .find((message) => message.role === "assistant");
-    if (
-      !lastAssistant ||
-      (lastAssistant.status !== "error" && lastAssistant.status !== "cancelled")
-    ) {
+    if (!user && totalUserMessages >= 5) {
+      window.location.href = "/login";
       return;
     }
 
-    const lastUser = [...activeSession.messages]
-      .reverse()
-      .find((message) => message.role === "user");
-    if (!lastUser) return;
+    // Build a FileList from the File[] for sendMessage
+    const currentInput = input;
+    let fileList: FileList | undefined;
+    if (attachments.length > 0) {
+      const dt = new DataTransfer();
+      attachments.forEach((a) => dt.items.add(a.file));
+      fileList = dt.files;
+    }
 
-    removeMessage(lastAssistant.id);
-    sendMessage(lastUser.content);
-  }, [getActiveSession, removeMessage, sendMessage]);
+    resetComposer();
+
+    await sendMessage({
+      text: currentInput,
+      ...(fileList && fileList.length > 0 && { files: fileList }),
+    });
+  }, [input, attachments, isLoading, user, sessions, sendMessage, resetComposer]);
+
+  const cancelActiveRequest = useCallback(() => {
+    stop();
+  }, [stop]);
+
+  const retryLastResponse = useCallback(() => {
+    regenerate();
+  }, [regenerate]);
 
   return {
     messages,
@@ -244,3 +174,4 @@ export function useChat() {
     retryLastResponse,
   };
 }
+

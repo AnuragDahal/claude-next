@@ -1,13 +1,14 @@
+import type { UIMessage as AIMessage } from "ai";
+
+
 export type MessageStatus = "idle" | "streaming" | "error" | "cancelled";
 
-export interface Message {
-  id: string;
-  role: "user" | "assistant";
+export type Message = AIMessage & {
   content: string;
   attachments?: { preview: string; type: string; name: string }[];
   timestamp?: number;
   status?: MessageStatus;
-}
+};
 
 export interface ChatSession {
   id: string;
